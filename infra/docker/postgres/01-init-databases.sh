@@ -11,7 +11,7 @@ echo ">>> Initializing Enterprise AI Platform service databases and roles..."
 
 # Create non-superuser application role for Row-Level Security enforcement
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
-    CREATE ROLE app_user WITH LOGIN PASSWORD 'app_dev_password';
+    CREATE ROLE app_user WITH LOGIN PASSWORD 'app_user_password';
     GRANT ALL PRIVILEGES ON SCHEMA public TO app_user;
 EOSQL
 

@@ -31,6 +31,7 @@ public class Ticket {
     @Column(name = "tenant_id", nullable = false, updatable = false)
     private String tenantId;
 
+    @org.hibernate.annotations.Generated(event = org.hibernate.generator.EventType.INSERT)
     @Column(name = "ticket_number", insertable = false, updatable = false)
     private Long ticketNumber;
 

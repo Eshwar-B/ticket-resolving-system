@@ -12,7 +12,7 @@ spring:
     name: ticket-service
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/ticket_db}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/ticket_db?stringtype=unspecified}
     username: ${SPRING_DATASOURCE_USERNAME:app_user}
     password: ${SPRING_DATASOURCE_PASSWORD:app_user_password}
     hikari:
@@ -41,7 +41,7 @@ spring:
 
   flyway:
     enabled: true
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/ticket_db}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/ticket_db?stringtype=unspecified}
     user: ${SPRING_DATASOURCE_USERNAME:app_user}
     password: ${SPRING_DATASOURCE_PASSWORD:app_user_password}
     locations: classpath:db/migration
@@ -94,7 +94,7 @@ management:
       application: ${spring.application.name}
       tenant: unknown   # overridden per-request by micrometer filter
   tracing:
-    enabled: true
+    enabled: ${MANAGEMENT_TRACING_ENABLED:false}
     sampling:
       probability: 1.0
   otlp:

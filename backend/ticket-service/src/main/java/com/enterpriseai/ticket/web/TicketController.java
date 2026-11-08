@@ -19,13 +19,6 @@ import java.util.UUID;
 
 /**
  * REST controller for the Ticket resource.
- *
- * <p>All endpoints require the upstream Gateway to have validated the Keycloak JWT
- * and set the {@code X-Tenant-Id} header. The {@link com.enterpriseai.ticket.config.TenantContextFilter}
- * populates {@link com.enterpriseai.common.context.TenantContext} from that header.
- *
- * <p>Error responses follow <a href="https://www.rfc-editor.org/rfc/rfc7807">RFC 7807</a>
- * ({@code application/problem+json}).
  */
 @RestController
 @RequestMapping(value = "/api/v1/tickets", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -57,7 +50,7 @@ public class TicketController {
     )
     public TicketResponse createTicket(
             @Valid @RequestBody CreateTicketRequest request,
-            @RequestHeader(value = "X-Tenant-Id", required = false) String tenantId) {
+            @RequestHeader(name = "X-Tenant-Id", required = false) String tenantId) {
         return ticketService.createTicket(request);
     }
 
@@ -74,8 +67,8 @@ public class TicketController {
             }
     )
     public PageResponse<TicketResponse> listTickets(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "20") int size) {
         return ticketService.listTickets(page, size);
     }
 
@@ -93,7 +86,7 @@ public class TicketController {
             }
     )
     public TicketResponse getTicket(
-            @Parameter(description = "Ticket UUID") @PathVariable UUID id) {
+            @Parameter(description = "Ticket UUID") @PathVariable("id") UUID id) {
         return ticketService.getTicket(id);
     }
 
@@ -112,10 +105,10 @@ public class TicketController {
             }
     )
     public TicketResponse transitionStatus(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Valid @RequestBody TransitionTicketRequest request,
-            @RequestHeader(value = "X-Actor-Id", defaultValue = "unknown") String actorId,
-            @RequestHeader(value = "X-Actor-Name", defaultValue = "Unknown") String actorName) {
+            @RequestHeader(name = "X-Actor-Id", defaultValue = "unknown") String actorId,
+            @RequestHeader(name = "X-Actor-Name", defaultValue = "Unknown") String actorName) {
         return ticketService.transitionStatus(id, request, actorId, actorName);
     }
 
@@ -133,10 +126,10 @@ public class TicketController {
             }
     )
     public TicketResponse assignTicket(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Valid @RequestBody AssignTicketRequest request,
-            @RequestHeader(value = "X-Actor-Id", defaultValue = "unknown") String actorId,
-            @RequestHeader(value = "X-Actor-Name", defaultValue = "Unknown") String actorName) {
+            @RequestHeader(name = "X-Actor-Id", defaultValue = "unknown") String actorId,
+            @RequestHeader(name = "X-Actor-Name", defaultValue = "Unknown") String actorName) {
         return ticketService.assignTicket(id, request, actorId, actorName);
     }
 
@@ -155,10 +148,10 @@ public class TicketController {
             }
     )
     public CommentResponse addComment(
-            @PathVariable UUID id,
+            @PathVariable("id") UUID id,
             @Valid @RequestBody AddCommentRequest request,
-            @RequestHeader(value = "X-Actor-Id", defaultValue = "unknown") String authorId,
-            @RequestHeader(value = "X-Actor-Name", defaultValue = "Unknown") String authorName) {
+            @RequestHeader(name = "X-Actor-Id", defaultValue = "unknown") String authorId,
+            @RequestHeader(name = "X-Actor-Name", defaultValue = "Unknown") String authorName) {
         return ticketService.addComment(id, request, authorId, authorName);
     }
 
@@ -171,7 +164,7 @@ public class TicketController {
             summary = "List comments",
             description = "Lists all non-deleted comments for a ticket in chronological order."
     )
-    public List<CommentResponse> listComments(@PathVariable UUID id) {
+    public List<CommentResponse> listComments(@PathVariable("id") UUID id) {
         return ticketService.listComments(id);
     }
 
@@ -190,9 +183,8 @@ public class TicketController {
             }
     )
     public void deleteTicket(
-            @PathVariable UUID id,
-            @RequestHeader(value = "X-Actor-Id", defaultValue = "unknown") String actorId) {
+            @PathVariable("id") UUID id,
+            @RequestHeader(name = "X-Actor-Id", defaultValue = "unknown") String actorId) {
         ticketService.deleteTicket(id, actorId);
     }
 }
-

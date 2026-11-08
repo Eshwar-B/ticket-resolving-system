@@ -32,8 +32,10 @@ public final class PostgresTenantRlsEnforcer {
             throw new IllegalArgumentException("Tenant ID cannot be null or empty for RLS.");
         }
 
-        // SET LOCAL binds to the current transaction only
-        try (PreparedStatement stmt = connection.prepareStatement("SET LOCAL app.tenant_id = ?")) {
+        // PostgreSQL does not support parameters in 'SET' statements.
+        // We use 'SELECT set_config('app.tenant_id', ?, true)' which is the parameterized,
+        // SQL-injection-safe equivalent of 'SET LOCAL app.tenant_id = ?'.
+        try (PreparedStatement stmt = connection.prepareStatement("SELECT set_config('app.tenant_id', ?, true)")) {
             stmt.setString(1, tenantId.trim());
             stmt.execute();
         }

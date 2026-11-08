@@ -180,10 +180,11 @@ services:
     restart: unless-stopped
     profiles: ["core", "full"]
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticket_db
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticket_db?stringtype=unspecified
       SPRING_DATASOURCE_USERNAME: ${APP_DB_USER:-app_user}
       SPRING_DATASOURCE_PASSWORD: ${APP_DB_PASSWORD:-app_user_password}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      MANAGEMENT_TRACING_ENABLED: "false"
       JAVA_TOOL_OPTIONS: "-Xmx256m -Xms128m -XX:+UseG1GC -XX:+UseContainerSupport"
       SPRING_PROFILES_ACTIVE: docker
     ports:
