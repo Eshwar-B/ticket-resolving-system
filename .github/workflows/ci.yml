@@ -14,6 +14,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install --quiet pyyaml
+
       - name: Copy .env.example to .env
         run: cp .env.example .env
 
@@ -24,12 +32,7 @@ jobs:
         run: docker compose --profile full config
 
       - name: Validate OpenTelemetry Collector Config Syntax
-        run: |
-          if command -v yamllint &> /dev/null; then
-            yamllint infra/observability/otel-collector-config.yaml
-          else
-            python3 -c "import yaml; yaml.safe_load(open('infra/observability/otel-collector-config.yaml'))"
-          fi
+        run: python3 -c "import yaml; yaml.safe_load(open('infra/observability/otel-collector-config.yaml'))"
 
       - name: Check for committed secrets (.env hygiene)
         run: |
@@ -66,4 +69,8 @@ jobs:
             echo "Checking $f..."
             test -s "$f" || (echo "$f is empty" && exit 1)
           done
+
+      - name: Validate Java Backend Compilation
+        run: |
+          mvn -B compile -DskipTests -f backend/pom.xml
 
