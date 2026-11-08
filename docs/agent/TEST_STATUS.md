@@ -1,8 +1,28 @@
-# Platform Test Status — Phase 3 (docs/test-status.md)
+# Platform Test Status — Phase 4 (docs/test-status.md)
 
 ---
 
-## Phase 3 Ticket Service Isolation Test Suite (All 10 Tests Executed Live)
+## Phase 4 Event-Driven Reliability & Outbox Test Suite (All 11 Tests Executed Live)
+
+Executed via: `powershell -ExecutionPolicy Bypass -File .\testing\reliability\test-phase4-reliability.ps1`
+
+| Test ID | Test Name | Description | Status | Evidence |
+|---|---|---|---|---|
+| **REL-P4-01** | `Actuator_Health_UP` | Spring Boot Actuator liveness probe | **PASS** | `{"status":"UP"}` |
+| **REL-P4-02** | `HTTP_Alpha_Ticket_List` | Alpha receives only Alpha-scoped tickets | **PASS** | 6 tickets returned, all `tenant-alpha` |
+| **REL-P4-03** | `HTTP_Beta_Ticket_List` | Beta receives only Beta-scoped tickets | **PASS** | 1 ticket returned, all `tenant-beta` |
+| **REL-P4-04** | `HTTP_Cross_Tenant_404` | Beta querying Alpha ticket returns 404 | **PASS** | HTTP 404 Resource Not Found |
+| **REL-P4-05** | `HTTP_Create_Ticket` | Mutation creates ticket with 201 Created | **PASS** | Valid UUID returned with status `NEW` |
+| **REL-P4-06** | `Idempotency_Key_Replay` | Replay with same key returns cached response | **PASS** | Header `X-Idempotent-Replay: true` |
+| **REL-P4-07** | `Outbox_Event_Recorded` | Atomic outbox row inserted in `ticket_db` | **PASS** | Row present in `outbox_events` |
+| **REL-P4-08** | `Outbox_Published_Status` | Background poller relays to Kafka | **PASS** | Status transitioned to `PUBLISHED` |
+| **REL-P4-09** | `Kafka_Message_Received` | Kafka topic receives canonical JSON envelope | **PASS** | `ticket.created.v1` consumed with matching ID |
+| **REL-P4-10** | `State_Machine_Rejection` | Invalid transition `NEW -> CLOSED` rejected | **PASS** | HTTP 422 Problem JSON (`invalid-state-transition`) |
+| **REL-P4-11** | `Ticket_Assignment_Auto_Open` | Agent assignment auto-transitions `NEW -> OPEN` | **PASS** | Status updated to `OPEN` |
+
+---
+
+## Phase 3 Ticket Service Isolation Test Suite (Carried Forward)
 
 Executed via: `powershell -ExecutionPolicy Bypass -File .\testing\security\test-ticket-isolation.ps1`
 

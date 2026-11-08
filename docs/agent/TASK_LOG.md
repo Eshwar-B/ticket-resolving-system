@@ -50,5 +50,14 @@ Chronological audit log of completed actions, file modifications, commands execu
 | 2026-11-07 15:23 | RLS Enforcement | Authored `TenantTransactionInterceptor.java` (AOP SET LOCAL enforcer) and `TenantContextFilter.java` (HTTP header to TenantContext) | PostgreSQL RLS scoping active on all service transactions |
 | 2026-11-07 15:24 | API Layer | Created REST DTOs, `TicketService.java`, `TicketController.java`, and `GlobalExceptionHandler.java` (RFC 7807 problem+json) | 8 REST endpoints + problem details mapped |
 | 2026-11-07 15:26 | Compose Service | Added `ticket-service` container definition to `docker-compose.yml` and authored multi-stage `backend/ticket-service/Dockerfile` | Service container budgeted with 384m RAM cap |
-| 2026-11-07 15:28 | Security Tests | Executed `testing/security/test-ticket-isolation.ps1` — 10 test categories | **All 10 test categories PASSED (10/10)** |
-| 2026-11-07 15:29 | Documentation | Created `docs/reverse-engineering/phase-3/01-ticket-service-core.md` with ERD, state machine, sequence diagrams | Phase 3 reverse-engineering guide complete |
+### Phase 4 Execution & Operations Manual Log
+
+| Timestamp (Local) | Action Category | Description & Files Modified | Result / Command Output |
+|---|---|---|---|
+| 2026-11-08 09:45 | Schema Migration | Authored `V3__outbox_and_reliability.sql` (`outbox_events`, `inbox_events`, `idempotency_records` with RLS) | Applied to `ticket_db` via Flyway |
+| 2026-11-08 10:15 | Event Envelopes | Created `contracts/events/envelope.v1.json`, `ticket.created.v1.json`, `ticket.updated.v1.json` | Versioned canonical JSON contracts declared |
+| 2026-11-08 11:20 | Outbox & Idempotency | Authored `OutboxService.java`, `OutboxPublisherService.java`, `IdempotencyService.java`, `IdempotencyFilter.java` | Atomic outbox + 1s Kafka poller + distributed HTTP idempotency filter |
+| 2026-11-08 13:16 | Reliability Drill | Executed `testing/reliability/test-phase4-reliability.ps1` (11 test cases) | **All 11 test cases PASSED (11/11)** |
+| 2026-11-08 13:19 | Git Integration | Staged Phase 3 files -> committed `"phase 3 completed"`. Staged Phase 4 files -> committed `"phase 4 completed"` | Pushed to GitHub `origin main` |
+| 2026-11-08 19:37 | Documentation | Authored comprehensive `USAGE.md` (zero-to-running setup, RBAC personas, feature-by-feature manual, allowed/forbidden rules) | `USAGE.md` published and linked in `README.md` |
+| 2026-11-08 19:38 | Platform Sync | Updated `README.md`, `docs/agent/PROJECT_STATE.md`, `docs/agent/TASK_LOG.md`, `docs/agent/TEST_STATUS.md` | Platform status aligned |

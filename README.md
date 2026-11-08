@@ -17,16 +17,21 @@
 ## Table of Contents
 
 1. [Architectural Blueprint](#1-architectural-blueprint)
-2. [Current Delivery Status (Phase 1 – Phase 4)](#2-current-delivery-status-phase-1--phase-4)
-3. [Zero-Trust Multi-Tenancy Architecture](#3-zero-trust-multi-tenancy-architecture)
-4. [Event-Driven Reliability & Transactional Outbox](#4-event-driven-reliability--transactional-outbox)
-5. [Core Ticket Domain & State Machine](#5-core-ticket-domain--state-machine)
-6. [Hardware Discipline & Resource Profile (16 GB RAM Cap)](#6-hardware-discipline--resource-profile-16-gb-ram-cap)
-7. [Getting Started & Local Quickstart](#7-getting-started--local-quickstart)
-8. [Automated Test Suites & Verification Drills](#8-automated-test-suites--verification-drills)
-9. [API Reference & Sample Invocations](#9-api-reference--sample-invocations)
-10. [Repository Structure](#10-repository-structure)
-11. [Governance & Reverse-Engineering Guides](#11-governance--reverse-engineering-guides)
+2. [Comprehensive Usage & Operations Guide (`USAGE.md`)](#comprehensive-usage--operations-guide-usagemd)
+3. [Current Delivery Status (Phase 1 – Phase 4)](#2-current-delivery-status-phase-1--phase-4)
+4. [Zero-Trust Multi-Tenancy Architecture](#3-zero-trust-multi-tenancy-architecture)
+5. [Event-Driven Reliability & Transactional Outbox](#4-event-driven-reliability--transactional-outbox)
+6. [Core Ticket Domain & State Machine](#5-core-ticket-domain--state-machine)
+7. [Hardware Discipline & Resource Profile (16 GB RAM Cap)](#6-hardware-discipline--resource-profile-16-gb-ram-cap)
+8. [Getting Started & Local Quickstart](#7-getting-started--local-quickstart)
+9. [Automated Test Suites & Verification Drills](#8-automated-test-suites--verification-drills)
+10. [API Reference & Sample Invocations](#9-api-reference--sample-invocations)
+11. [Repository Structure](#10-repository-structure)
+12. [Governance & Reverse-Engineering Guides](#11-governance--reverse-engineering-guides)
+
+---
+
+> 📖 **Full User & Administrator Manual:** For an exhaustive guide on deploying on brand-new devices from scratch, RBAC roles (Admin, Agent, Customer, AI Supervisor), feature-by-feature walk-throughs, and system boundaries ("what can and cannot be done"), see [`USAGE.md`](./USAGE.md).
 
 ---
 
