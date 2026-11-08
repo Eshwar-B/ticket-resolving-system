@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://platform.enterpriseai.local/schemas/events/envelope.v1.json",
+  "title": "PlatformEventEnvelopeV1",
+  "description": "Canonical event envelope for all asynchronous messaging across the Enterprise AI Platform. Partition key in Kafka is tenantId.",
+  "type": "object",
+  "required": [
+    "eventId",
+    "eventType",
+    "eventVersion",
+    "occurredAt",
+    "tenantId",
+    "aggregateId",
+    "aggregateVersion",
+    "correlationId",
+    "producer",
+    "payload"
+  ],
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Unique identifier for this specific event occurrence (UUID v4)."
+    },
+    "eventType": {
+      "type": "string",
+      "pattern": "^[a-z]+(\\.[a-z]+)+\\.v[0-9]+$",
+      "description": "Fully qualified dot-notated event name ending in version suffix (e.g. ticket.created.v1)."
+    },
+    "eventVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Major schema version number matching the eventType suffix."
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp in UTC when the event occurred in the domain."
+    },
+    "tenantId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Tenant identifier. Strictly used as the Kafka message partition key."
+    },
+    "aggregateId": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier of the domain aggregate root (e.g. ticket UUID)."
+    },
+    "aggregateVersion": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Sequential optimistic locking version of the aggregate root for out-of-order detection."
+    },
+    "correlationId": {
+      "type": "string",
+      "description": "End-to-end trace correlation ID initiated at the API Gateway."
+    },
+    "causationId": {
+      "type": "string",
+      "description": "The eventId or commandId that directly caused this event to occur."
+    },
+    "traceparent": {
+      "type": "string",
+      "description": "W3C Trace Context traceparent string (00-<trace_id>-<span_id>-<trace_flags>) for OTel distributed tracing."
+    },
+    "producer": {
+      "type": "string",
+      "description": "Name of the service that emitted the event (e.g. ticket-service)."
+    },
+    "payload": {
+      "type": "object",
+      "description": "Event-specific domain payload validated against its specific event schema."
+    }
+  },
+  "additionalProperties": false
+}
+

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://platform.enterpriseai.local/schemas/events/ticket.updated.v1.json",
+  "title": "TicketUpdatedV1",
+  "type": "object",
+  "required": [
+    "ticketId",
+    "ticketNumber",
+    "changeType",
+    "previousState",
+    "newState",
+    "actorId"
+  ],
+  "properties": {
+    "ticketId": { "type": "string", "format": "uuid" },
+    "ticketNumber": { "type": "integer" },
+    "changeType": { "type": "string", "enum": ["STATUS_CHANGED", "ASSIGNED", "COMMENTED", "PRIORITY_CHANGED"] },
+    "previousState": { "type": "string" },
+    "newState": { "type": "string" },
+    "actorId": { "type": "string" },
+    "details": { "type": "object" }
+  },
+  "additionalProperties": false
+}
+

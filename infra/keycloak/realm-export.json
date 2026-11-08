@@ -1,0 +1,123 @@
+{
+  "realm": "enterprise-ai",
+  "enabled": true,
+  "displayName": "Enterprise AI Platform",
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "accessTokenLifespan": 3600,
+  "roles": {
+    "realm": [
+      {
+        "name": "TENANT_ADMIN",
+        "description": "Administrator for a specific tenant organization"
+      },
+      {
+        "name": "SUPPORT_AGENT",
+        "description": "Customer support agent handling tickets"
+      },
+      {
+        "name": "CUSTOMER",
+        "description": "End-user customer submitting tickets"
+      }
+    ]
+  },
+  "groups": [
+    {
+      "name": "tenant-alpha",
+      "path": "/tenant-alpha",
+      "attributes": {
+        "tenant_id": ["tenant-alpha"]
+      }
+    },
+    {
+      "name": "tenant-beta",
+      "path": "/tenant-beta",
+      "attributes": {
+        "tenant_id": ["tenant-beta"]
+      }
+    }
+  ],
+  "users": [
+    {
+      "username": "alice@alpha.com",
+      "email": "alice@alpha.com",
+      "firstName": "Alice",
+      "lastName": "AlphaAdmin",
+      "enabled": true,
+      "emailVerified": true,
+      "attributes": {
+        "tenant_id": ["tenant-alpha"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["TENANT_ADMIN"],
+      "groups": ["/tenant-alpha"]
+    },
+    {
+      "username": "bob@beta.com",
+      "email": "bob@beta.com",
+      "firstName": "Bob",
+      "lastName": "BetaAdmin",
+      "enabled": true,
+      "emailVerified": true,
+      "attributes": {
+        "tenant_id": ["tenant-beta"]
+      },
+      "credentials": [
+        {
+          "type": "password",
+          "value": "Password123!",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["TENANT_ADMIN"],
+      "groups": ["/tenant-beta"]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "platform-gateway",
+      "name": "Enterprise AI Gateway",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "gateway_client_dev_secret",
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "access.token.lifespan": "3600"
+      },
+      "protocolMappers": [
+        {
+          "name": "tenant_id-mapper",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "tenant_id",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "tenant_id",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    }
+  ]
+}
+

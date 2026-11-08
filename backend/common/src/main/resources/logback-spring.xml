@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ============================================================================== -->
+<!-- Enterprise AI Platform: Structured JSON Logging Foundation                      -->
+<!-- Conforms to Blueprint Section 14: Structured JSON Logs with trace_id & tenant_id -->
+<!-- ============================================================================== -->
+<configuration scan="true" scanPeriod="30 seconds">
+    <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="backend-service"/>
+
+    <!-- Console JSON Appender for Container & Loki Log Shipping -->
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+                <version/>
+                <logLevel/>
+                <pattern>
+                    <pattern>
+                        {
+                            "service": "${appName}",
+                            "trace_id": "%mdc{trace_id:-%X{traceId:-none}}",
+                            "span_id": "%mdc{span_id:-%X{spanId:-none}}",
+                            "tenant_id": "%mdc{tenant_id:-none}",
+                            "ticket_id": "%mdc{ticket_id:-none}",
+                            "correlation_id": "%mdc{correlation_id:-none}",
+                            "thread": "%thread",
+                            "logger": "%logger{36}",
+                            "message": "%message"
+                        }
+                    </pattern>
+                </pattern>
+                <stackTrace>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                        <maxLength>2048</maxLength>
+                        <shortenedClassNameCounter>2</shortenedClassNameCounter>
+                        <rootCauseFirst>true</rootCauseFirst>
+                    </throwableConverter>
+                </stackTrace>
+            </providers>
+        </encoder>
+    </appender>
+
+    <!-- Standard plain console appender for local CLI debugging when formatted logs are disabled -->
+    <appender name="PLAIN_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [tenant:%X{tenant_id:-none} trace:%X{traceId:-none}] - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Default log levels -->
+    <root level="INFO">
+        <appender-ref ref="JSON_CONSOLE"/>
+    </root>
+
+    <logger name="com.enterpriseai" level="DEBUG"/>
+    <logger name="org.springframework.web" level="INFO"/>
+    <logger name="org.apache.kafka" level="WARN"/>
+    <logger name="org.hibernate.SQL" level="WARN"/>
+</configuration>
+

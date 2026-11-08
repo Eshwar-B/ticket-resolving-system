@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://platform.enterpriseai.local/schemas/events/ticket.created.v1.json",
+  "title": "TicketCreatedV1",
+  "type": "object",
+  "required": [
+    "ticketId",
+    "ticketNumber",
+    "customerId",
+    "customerEmail",
+    "status",
+    "priority",
+    "category",
+    "subject",
+    "description"
+  ],
+  "properties": {
+    "ticketId": { "type": "string", "format": "uuid" },
+    "ticketNumber": { "type": "integer" },
+    "customerId": { "type": "string", "format": "uuid" },
+    "customerEmail": { "type": "string", "format": "email" },
+    "status": { "type": "string", "enum": ["NEW", "OPEN"] },
+    "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+    "category": { "type": "string" },
+    "subject": { "type": "string" },
+    "description": { "type": "string" },
+    "externalRef": { "type": ["string", "null"] },
+    "tags": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": false
+}
+
