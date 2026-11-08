@@ -2,7 +2,7 @@ package com.enterpriseai.ticket.config;
 
 import com.enterpriseai.common.context.TenantContext;
 import com.enterpriseai.ticket.entity.IdempotencyRecord;
-import com.enterpriseai.ticket.repository.IdempotencyRecordRepository;
+import com.enterpriseai.ticket.service.IdempotencyService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,10 +36,10 @@ public class IdempotencyFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger(IdempotencyFilter.class);
     private static final String IDEMPOTENCY_HEADER = "Idempotency-Key";
 
-    private final IdempotencyRecordRepository idempotencyRecordRepository;
+    private final IdempotencyService idempotencyService;
 
-    public IdempotencyFilter(IdempotencyRecordRepository idempotencyRecordRepository) {
-        this.idempotencyRecordRepository = idempotencyRecordRepository;
+    public IdempotencyFilter(IdempotencyService idempotencyService) {
+        this.idempotencyService = idempotencyService;
     }
 
     @Override
@@ -59,8 +59,7 @@ public class IdempotencyFilter extends OncePerRequestFilter {
         ContentCachingResponseWrapper wrappedResponse = new ContentCachingResponseWrapper(response);
 
         // Check if an existing record exists for (tenantId, idempotencyKey)
-        Optional<IdempotencyRecord> existing = idempotencyRecordRepository
-                .findByTenantIdAndIdempotencyKey(tenantId, idempotencyKey.trim());
+        Optional<IdempotencyRecord> existing = idempotencyService.findRecord(tenantId, idempotencyKey.trim());
 
         if (existing.isPresent()) {
             IdempotencyRecord record = existing.get();
@@ -85,13 +84,7 @@ public class IdempotencyFilter extends OncePerRequestFilter {
             String responseStr = new String(responseBody, StandardCharsets.UTF_8);
 
             try {
-                IdempotencyRecord newRecord = new IdempotencyRecord();
-                newRecord.setTenantId(tenantId);
-                newRecord.setIdempotencyKey(idempotencyKey.trim());
-                newRecord.setRequestHash(requestHash);
-                newRecord.setResponseStatus(status);
-                newRecord.setResponseBody(responseStr);
-                idempotencyRecordRepository.save(newRecord);
+                idempotencyService.saveRecord(tenantId, idempotencyKey.trim(), requestHash, status, responseStr);
                 log.debug("Cached idempotency record for key={} tenant={}", idempotencyKey, tenantId);
             } catch (Exception e) {
                 log.warn("Failed to persist idempotency record: {}", e.getMessage());

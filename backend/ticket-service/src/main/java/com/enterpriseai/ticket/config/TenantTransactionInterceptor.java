@@ -43,7 +43,8 @@ public class TenantTransactionInterceptor {
      * Uses pointcut matching service layer to avoid applying on JPA/Hibernate internals.
      */
     @Around("@annotation(org.springframework.transaction.annotation.Transactional) && " +
-            "within(com.enterpriseai.ticket.service..*)")
+            "within(com.enterpriseai.ticket.service..*) && " +
+            "!within(com.enterpriseai.ticket.service.OutboxPublisherService)")
     public Object setTenantRls(ProceedingJoinPoint joinPoint) throws Throwable {
         String tenantId = TenantContext.getTenantId().orElse(null);
 

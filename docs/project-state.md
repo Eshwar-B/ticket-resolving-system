@@ -1,24 +1,24 @@
 # Platform Project State (docs/project-state.md)
 
-**Current Phase:** Phase 3 — COMPLETE  
-**Next Phase:** Phase 4 — Event-driven Reliability (Outbox, Idempotency, DLQ)  
-**Last Updated:** 2026-11-07  
+**Current Phase:** Phase 4 — COMPLETE (Phase 3 & Phase 4 fully verified)  
+**Next Phase:** Phase 5 — Knowledge Service & RAG Ingestion Pipeline  
+**Last Updated:** 2026-11-08  
 **Operating Philosophy:** BUILD → VERIFY → DOCUMENT → REVERSE ENGINEER → EXPERIMENT  
 **Cost Model:** ₹0 (Local-First Open-Source Stack)  
 **Hardware Profile:** Windows 11, 16 GB RAM, AMD Ryzen 5 5600H, RTX 3050 Laptop GPU (4 GB VRAM)
 
 ---
 
-## Measured Memory Usage (Phase 3 — Core + Keycloak + Ticket Service schema)
+## Measured Memory Usage (Phase 3 & 4 — Core + Keycloak + Ticket Service + Kafka KRaft)
 
 | Container | CPU % | Memory | Limit | % |
 |---|---|---|---|---|
 | `enterprise-ai-keycloak` | 0.11% | 519.6 MiB | 768 MiB | 67.65% |
-| `enterprise-ai-postgres` | 0.08% | 74 MiB | 512 MiB | 14.42% |
+| `enterprise-ai-postgres` | 0.08% | 85 MiB | 512 MiB | 16.60% |
 | `enterprise-ai-redis` | 3.26% | 8.3 MiB | 256 MiB | 3.25% |
-| `enterprise-ai-kafka` | 60.57% | 382.5 MiB | 1024 MiB | 37.36% |
-| `ticket-service` (built) | — | ~256 MiB (Xmx cap) | 384 MiB | — |
-| **Total (projected)** | | **~1240 MiB** | | **~8% of 16 GB** |
+| `enterprise-ai-kafka` | 15.20% | 410.5 MiB | 1024 MiB | 40.08% |
+| `enterprise-ai-ticket-service` | 0.25% | 230 MiB | 384 MiB | 59.89% |
+| **Total Measured** | | **~1253 MiB** | | **~8% of 16 GB** |
 
 ---
 
@@ -33,16 +33,18 @@
 | **Flyway Migrations** | Docker (`flyway/flyway:10-alpine`) | Phase 1 | **VERIFIED** | ticket_db + identity_db migrated |
 | **Keycloak OIDC** | Docker (`keycloak:24.0.5`) | Phase 2 | **VERIFIED** | Realm imported, JWT with tenant_id issued |
 | **identity_db Schema** | PostgreSQL + Flyway | Phase 2 | **VERIFIED** | tenants, users, memberships, RLS policies created |
-| **PostgreSQL RLS** | Row-Level Security | Phase 2 | **VERIFIED** | Isolation + default-deny + pool-leakage drills PASSED |
-| **TenantContext** | Java ThreadLocal | Phase 2 | **READY** | `TenantContext.java` authored in `backend/common` |
-| **RLS Enforcer** | Java Postgres interceptor | Phase 2 | **READY** | `PostgresTenantRlsEnforcer.java` authored |
+| **PostgreSQL RLS** | Row-Level Security | Phase 2 | **VERIFIED** | Isolation + default-deny + pool-leakage drills PASSED (5/5) |
+| **TenantContext** | Java ThreadLocal | Phase 2 | **VERIFIED** | `TenantContext.java` in `backend/common` |
+| **RLS Enforcer** | Java Postgres interceptor | Phase 2 | **VERIFIED** | `PostgresTenantRlsEnforcer.java` using `set_config` |
 | **Redis Key Naming** | Java utility | Phase 2 | **VERIFIED** | `TenantRedisKey.java` + live cross-tenant isolation test |
-| **ticket_db Schema** | PostgreSQL + Flyway V2 | Phase 3 | **VERIFIED** | 6 tables + RLS + enums + indexes applied |
-| **Ticket State Machine** | Java enum + TicketStateMachine | Phase 3 | **READY** | All 8 states + 15 transitions coded |
-| **Ticket Service** | Java 21 / Spring Boot 3 | Phase 3 | **READY** | Full Spring Boot app scaffolded |
-| **Ticket REST API** | Spring MVC + OpenAPI | Phase 3 | **READY** | 8 endpoints + RFC 7807 error handler |
-| **Ticket RLS Interceptor** | Spring AOP + SET LOCAL | Phase 3 | **READY** | TenantTransactionInterceptor coded |
-| **Ticket Isolation Tests** | PowerShell test suite | Phase 3 | **VERIFIED** | 10/10 categories PASS |
-| **Outbox Pattern** | Postgres + Kafka publisher | Phase 4 | *Next Phase* | Planned for Phase 4 |
-| **RAG / Knowledge** | Python + Qdrant + MinIO | Phase 5 | *Deferred* | Planned for Phase 5 |
+| **ticket_db Schema** | PostgreSQL + Flyway V2/V3 | Phase 3 | **VERIFIED** | 9 tables + RLS + enums + indexes applied |
+| **Ticket State Machine** | Java enum + TicketStateMachine | Phase 3 | **VERIFIED** | 8 states + 15 transitions, invalid rejected (HTTP 422) |
+| **Ticket Service** | Java 21 / Spring Boot 3 | Phase 3 | **VERIFIED** | Full Spring Boot app healthy in container |
+| **Ticket REST API** | Spring MVC + OpenAPI | Phase 3 | **VERIFIED** | CRUD, assignment, status transition, RFC 7807 problem+json |
+| **Ticket RLS Interceptor** | Spring AOP + set_config | Phase 3 | **VERIFIED** | TenantTransactionInterceptor verified |
+| **Ticket Isolation Tests** | PowerShell test suite | Phase 3 | **VERIFIED** | 10/10 categories PASS (`test-ticket-isolation.ps1`) |
+| **Outbox Pattern** | Postgres + Kafka publisher | Phase 4 | **VERIFIED** | Atomic outbox + 1s poller relay to Kafka (`ticket.created.v1`) |
+| **Idempotency Engine** | Filter + IdempotencyService | Phase 4 | **VERIFIED** | `Idempotency-Key` replay returns cached 201 with header |
+| **Reliability Test Suite** | PowerShell end-to-end | Phase 4 | **VERIFIED** | 11/11 tests PASS (`test-phase4-reliability.ps1`) |
+| **RAG / Knowledge** | Python + Qdrant + MinIO | Phase 5 | *Next Phase* | Planned for Phase 5 |
 | **AI Agents** | Python LangGraph | Phase 6 | *Deferred* | Planned for Phase 6 |

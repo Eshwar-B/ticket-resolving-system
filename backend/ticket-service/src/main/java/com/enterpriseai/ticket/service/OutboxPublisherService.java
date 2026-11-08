@@ -41,6 +41,7 @@ public class OutboxPublisherService {
     }
 
     @Scheduled(fixedDelayString = "${outbox.publisher.interval-ms:2000}", initialDelay = 5000)
+    @Transactional
     public void publishPendingEvents() {
         try {
             processBatch();
@@ -52,7 +53,7 @@ public class OutboxPublisherService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public int processBatch() {
         // Authorize background worker for cross-tenant outbox polling
-        entityManager.createNativeQuery("SET LOCAL app.is_system_worker = 'true'").executeUpdate();
+        entityManager.createNativeQuery("SELECT set_config('app.is_system_worker', 'true', true)").getSingleResult();
 
         @SuppressWarnings("unchecked")
         List<OutboxEvent> pendingEvents = entityManager.createNativeQuery(

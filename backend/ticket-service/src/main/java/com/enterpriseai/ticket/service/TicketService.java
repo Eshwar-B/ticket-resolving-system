@@ -120,9 +120,9 @@ public class TicketService {
                 saved.getId().toString(),
                 1,
                 request.idempotencyKey(),
-                java.util.Map.of(
+                safeMap(
                         "ticketId", saved.getId().toString(),
-                        "ticketNumber", saved.getTicketNumber(),
+                        "ticketNumber", saved.getTicketNumber() != null ? saved.getTicketNumber() : 0L,
                         "customerId", customer.getId().toString(),
                         "customerEmail", customer.getEmail(),
                         "status", saved.getStatus().name(),
@@ -221,9 +221,9 @@ public class TicketService {
                 saved.getId().toString(),
                 2,
                 null,
-                java.util.Map.of(
+                safeMap(
                         "ticketId", saved.getId().toString(),
-                        "ticketNumber", saved.getTicketNumber(),
+                        "ticketNumber", saved.getTicketNumber() != null ? saved.getTicketNumber() : 0L,
                         "changeType", "STATUS_CHANGED",
                         "previousState", fromStatus.name(),
                         "newState", toStatus.name(),
@@ -287,9 +287,9 @@ public class TicketService {
                 saved.getId().toString(),
                 2,
                 null,
-                java.util.Map.of(
+                safeMap(
                         "ticketId", saved.getId().toString(),
-                        "ticketNumber", saved.getTicketNumber(),
+                        "ticketNumber", saved.getTicketNumber() != null ? saved.getTicketNumber() : 0L,
                         "assignedTo", request.agentId(),
                         "assignedBy", actorId
                 )
@@ -379,6 +379,18 @@ public class TicketService {
         sla.setFirstResponseDue(now.plusHours(STANDARD_FIRST_RESPONSE_H));
         sla.setResolutionDue(now.plusHours(STANDARD_RESOLUTION_H));
         return sla;
+    }
+
+    private java.util.Map<String, Object> safeMap(Object... entries) {
+        java.util.Map<String, Object> map = new java.util.HashMap<>();
+        for (int i = 0; i < entries.length; i += 2) {
+            String key = (String) entries[i];
+            Object val = entries[i + 1];
+            if (val != null) {
+                map.put(key, val);
+            }
+        }
+        return map;
     }
 }
 
