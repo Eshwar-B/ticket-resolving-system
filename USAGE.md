@@ -597,6 +597,72 @@ SLA deadlines are permanently tracked in the `ticket_sla` table and emitted in t
 
 ---
 
+### Feature 8: Knowledge Management & Hybrid RAG Engine
+
+The platform provides a local-first, zero-leakage Hybrid Retrieval-Augmented Generation (RAG) knowledge engine combining dense vector embeddings with PostgreSQL Full-Text Search.
+
+#### 1. Ingesting a Document (Tenant Admin / Agent):
+```powershell
+$docPayload = @{
+    title = "Hardware Replacement and Return Policy"
+    content = "Customers may request refunds within 30 days of purchase for unused products in original packaging. Defective units will be replaced via RMA with prepaid return shipping labels."
+    sourceType = "UPLOAD"
+    metadata = @{
+        department = "support"
+        version = "1.0"
+    }
+} | ConvertTo-Json
+
+$headers = @{
+    "Content-Type" = "application/json"
+    "X-Tenant-Id"  = "tenant-alpha"
+    "X-User-Id"    = "admin-001"
+}
+
+$doc = Invoke-RestMethod -Uri "http://localhost:8082/api/v1/knowledge/documents" `
+    -Method Post -Headers $headers -Body $docPayload
+```
+
+#### 2. Executing a Hybrid RAG Search with Citations:
+```powershell
+$searchPayload = @{
+    query = "replacement return window RMA"
+    topK = 5
+} | ConvertTo-Json
+
+$results = Invoke-RestMethod -Uri "http://localhost:8082/api/v1/knowledge/search" `
+    -Method Post -Headers $headers -Body $searchPayload
+```
+**Response with Formatted Citations:**
+```json
+{
+  "query": "replacement return window RMA",
+  "tenantId": "tenant-alpha",
+  "totalHits": 1,
+  "results": [
+    {
+      "chunkId": "f0345163-1e27-4a38-b48a-33b3890c51df",
+      "documentId": "ec2b6f9d-6571-4bea-812c-3ff03f4e8063",
+      "documentTitle": "Hardware Replacement and Return Policy",
+      "version": 1,
+      "chunkIndex": 0,
+      "content": "Customers may request refunds within 30 days of purchase...",
+      "score": 0.03278688524590164,
+      "retrievalMethod": "FTS",
+      "citation": "[Doc: \"Hardware Replacement and Return Policy\" v1 #chunk-0]"
+    }
+  ]
+}
+```
+
+#### 3. Soft-Deleting a Document:
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8082/api/v1/knowledge/documents/$($doc.id)" `
+    -Method Delete -Headers $headers
+```
+
+---
+
 ## 5. System Invariants: "What CAN Be Done" vs. "What CANNOT Be Done"
 
 To guarantee operational security and data integrity, review this invariant matrix:
@@ -690,6 +756,20 @@ powershell -File testing/reliability/test-phase4-reliability.ps1
 - Invalid state transition rejection (HTTP 422 Problem JSON).
 - Agent assignment auto-state change (`NEW -> OPEN`).
 
+### Drill 4: Knowledge Management & Hybrid RAG (`Phase 5`)
+```powershell
+powershell -File testing/rag/test-phase5-rag.ps1
+```
+*Validates (12/12 PASS):*
+- Knowledge Service healthcheck (`status: UP`).
+- Multi-tenant document ingestion & S3 archiving with versioned keys.
+- Recursive text chunking & token counting.
+- Qdrant 384-dimensional dense vector indexing.
+- Hybrid RAG search (PostgreSQL FTS + Qdrant vectors + Reciprocal Rank Fusion).
+- Strict cross-tenant isolation (Zero leakage of Tenant Beta docs into Tenant Alpha queries).
+- Precise citation generation (`[Doc: "Title" v1 #chunk-0]`).
+- Soft-delete lifecycle with immediate exclusion from search results.
+
 ---
 
 ## Summary of Completed Phases
@@ -698,6 +778,6 @@ powershell -File testing/reliability/test-phase4-reliability.ps1
 - **Phase 2 (Identity & Multi-Tenancy):** Keycloak realm, JWT tenant derivation, PostgreSQL Row-Level Security, Redis key prefixing.
 - **Phase 3 (Core Ticketing Microservice):** Spring Boot 3.3.4, 6-table schema, 8-state machine, RFC 7807 problem details, AOP RLS interceptor.
 - **Phase 4 (Event-Driven Reliability):** Transactional outbox, 1-second poller relay, Kafka topics (`ticket.created.v1`), distributed idempotency engine.
-- **Upcoming Phase 5:** Knowledge Service & Hybrid RAG Ingestion Pipeline (Qdrant + MinIO + FastEmbed).
-- **Upcoming Phase 6:** LangGraph Autonomous AI Multi-Agent Resolution System.
+- **Phase 5 (Knowledge Management & Hybrid RAG):** S3 object archiving, Qdrant vector search, PostgreSQL full-text search, Reciprocal Rank Fusion, citations.
+- **Phase 6 (Agentic AI & Approvals):** LangGraph Multi-Agent Engine & Human Approvals.
 

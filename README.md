@@ -78,7 +78,7 @@ The **Enterprise AI Platform** is an enterprise-scale autonomous customer servic
 
 ---
 
-## 2. Current Delivery Status (Phase 1 – Phase 4)
+## 2. Current Delivery Status (Phase 1 – Phase 5)
 
 | Phase | Milestone | Technology | Status | Key Deliverables & Evidence |
 |---|---|---|---|---|
@@ -86,8 +86,8 @@ The **Enterprise AI Platform** is an enterprise-scale autonomous customer servic
 | **Phase 2** | **Identity & Multi-Tenancy** | Keycloak OIDC, PostgreSQL RLS | **VERIFIED** | JWT tenant derivation, `test-tenant-isolation.ps1` (5/5 PASS) |
 | **Phase 3** | **Core Ticket Service** | Spring Boot 3.3.4, Java 21, Flyway | **VERIFIED** | 6-table schema, 8-state machine, `test-ticket-isolation.ps1` (10/10 PASS) |
 | **Phase 4** | **Event-Driven Reliability** | Outbox, Idempotency, Kafka Topics | **VERIFIED** | Dual-write prevention, `test-phase4-reliability.ps1` (11/11 PASS) |
-| **Phase 5** | **Knowledge & Hybrid RAG** | MinIO, Qdrant, FastEmbed | *Next Active* | Tenant document ingestion, hybrid chunking, BM25 + dense |
-| **Phase 6** | **LangGraph AI Resolution** | LangGraph, Ollama, PII Presidio | *Upcoming* | Autonomous agent loop, guardrails, confidence gates |
+| **Phase 5** | **Knowledge & Hybrid RAG** | S3 (S3Mock), Qdrant, Postgres FTS | **VERIFIED** | Ingestion, Reciprocal Rank Fusion, `test-phase5-rag.ps1` (12/12 PASS) |
+| **Phase 6** | **Agentic AI & Approvals** | LangGraph, Workflow Engine | *Next Active* | Multi-agent supervisor, human-in-the-loop approval engine |
 | **Phase 7** | **Observability & Audit** | OpenTelemetry, Phoenix, Prometheus | *Upcoming* | Tracing context propagation, tenant-scoped audit logging |
 
 ---
@@ -181,7 +181,45 @@ The ticketing core enforces a deterministic 8-state lifecycle with 15 valid tran
 
 ---
 
-## 6. Hardware Discipline & Resource Profile (16 GB RAM Cap)
+## 6. Knowledge Management & Hybrid RAG (Phase 5)
+
+Phase 5 introduces an enterprise-grade, zero-leakage Hybrid Retrieval-Augmented Generation (RAG) system:
+
+```
+[ Ingest Document (PDF/Text) ]
+        │
+        ├──────────────────────────────────┐
+        ▼                                  ▼
+[ S3 Object Storage ]            [ Recursive Text Chunking ]
+tenants/{tenant_id}/...          512 chars / 64 overlap
+                                           │
+                        ┌──────────────────┴──────────────────┐
+                        ▼                                     ▼
+             [ PostgreSQL 16 FTS ]                  [ Qdrant Vector DB ]
+             - tsvector generation                  - 384-dim dense vectors
+             - GIN index search                     - Mandatory tenant_id filter
+             - RLS kernel isolation                 - Cosine similarity matching
+                        │                                     │
+                        └──────────────────┬──────────────────┘
+                                           ▼
+                            [ Reciprocal Rank Fusion (RRF) ]
+                            Score = Σ (1 / (60 + Rank))
+                                           │
+                                           ▼
+                            [ Fused Ranked Citations ]
+                            [Doc: "Return Policy" v1 #chunk-0]
+```
+
+### Key Architectural Invariants
+1. **Physical S3 Key Partitioning:** Raw documents are archived with immutable keys: `tenants/{tenant_id}/documents/{document_id}/v{version}/{filename}`.
+2. **PostgreSQL RLS Full-Text Search:** Document chunks reside in `document_chunks` table protected by `CREATE POLICY documents_tenant_isolation`. Keyword search uses native `plainto_tsquery` ranking.
+3. **Qdrant Vector Isolation:** Every semantic search query enforces a hard payload filter: `must: [{ key: "tenant_id", match: { value: tenantId } }]`. Cross-tenant vector leakage is mathematically impossible.
+4. **Reciprocal Rank Fusion (RRF):** Fuses keyword (BM25/FTS) and dense vector ranks with constant $k=60$.
+5. **Soft Deletion & Immediate Invalidation:** Deleting a document marks `deleted_at = now()`, immediately purging it from RRF search results.
+
+---
+
+## 7. Hardware Discipline & Resource Profile (16 GB RAM Cap)
 
 The platform is purpose-built to run sustainably on everyday developer hardware (16 GB RAM, 4 GB VRAM) with **₹0 cloud dependencies**:
 
@@ -228,7 +266,7 @@ Invoke-RestMethod -Uri "http://localhost:8081/actuator/health"
 
 ## 8. Automated Test Suites & Verification Drills
 
-Three automated test suites guarantee non-regression, tenant isolation, and event reliability:
+Four automated test suites guarantee non-regression, tenant isolation, event reliability, and hybrid RAG accuracy:
 
 ### 1. Multi-Tenant Identity & PostgreSQL RLS (`Phase 2`)
 ```powershell
@@ -256,6 +294,20 @@ powershell -File testing/reliability/test-phase4-reliability.ps1
 - `Idempotency-Key` replay returning cached response with `X-Idempotent-Replay: true`
 - State machine violation rejection (HTTP 422)
 - Agent assignment auto-state change (`NEW -> OPEN`)
+
+### 4. Knowledge Management & Hybrid RAG (`Phase 5`)
+```powershell
+powershell -File testing/rag/test-phase5-rag.ps1
+```
+*Assertions (12/12 PASS):*
+- Knowledge Service healthcheck (`status: UP`)
+- Multi-tenant document ingestion & S3 archiving with versioned keys
+- Recursive text chunking & token counting
+- Qdrant 384-dimensional dense vector indexing
+- Hybrid RAG search (PostgreSQL FTS + Qdrant vectors + Reciprocal Rank Fusion)
+- Strict cross-tenant isolation (Zero leakage of Tenant Beta docs into Tenant Alpha queries)
+- Precise citation generation (`[Doc: "Title" v1 #chunk-0]`)
+- Soft-delete lifecycle with immediate exclusion from search results
 
 ---
 
