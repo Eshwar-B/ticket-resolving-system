@@ -663,6 +663,57 @@ Invoke-RestMethod -Uri "http://localhost:8082/api/v1/knowledge/documents/$($doc.
 
 ---
 
+### Feature 9: Human Approvals & Workflow Governance Engine
+
+For high-risk operations (e.g. monetary refunds, order cancellations, or credit adjustments), the platform enforces strict Human-in-the-Loop (HITL) authorization via the dedicated Workflow Service (`workflow-service` on port 8083).
+
+#### 1. Requesting Human Approval (AI Agent / System):
+```powershell
+$approvalPayload = @{
+    ticketId = "24953765-251c-4ddd-a3ca-f48d07036a06"
+    actionType = "REFUND_AUTHORIZATION"
+    payload = '{"amount": 120.00, "currency": "USD", "reason": "Damaged goods in transit"}'
+    requester = "ai-supervisor"
+} | ConvertTo-Json
+
+$headers = @{
+    "Content-Type" = "application/json"
+    "X-Tenant-Id"  = "tenant-alpha"
+}
+
+$approval = Invoke-RestMethod -Uri "http://localhost:8083/api/v1/approvals" `
+    -Method Post -Headers $headers -Body $approvalPayload
+```
+
+#### 2. Viewing Pending Approvals (Tenant Manager / Admin):
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8083/api/v1/approvals/pending" -Method Get -Headers $headers
+```
+
+#### 3. Granting Approval (Human Operator):
+```powershell
+$decision = @{
+    approver = "manager-alpha"
+    note = "Approved refund under 30-day RMA policy"
+} | ConvertTo-Json
+
+Invoke-RestMethod -Uri "http://localhost:8083/api/v1/approvals/$($approval.id)/approve" `
+    -Method Post -Headers $headers -Body $decision
+```
+
+#### 4. Rejecting an Approval Request:
+```powershell
+$rejection = @{
+    approver = "finance-admin-alpha"
+    note = "Photographic evidence of damage not provided"
+} | ConvertTo-Json
+
+Invoke-RestMethod -Uri "http://localhost:8083/api/v1/approvals/$($approval.id)/reject" `
+    -Method Post -Headers $headers -Body $rejection
+```
+
+---
+
 ## 5. System Invariants: "What CAN Be Done" vs. "What CANNOT Be Done"
 
 To guarantee operational security and data integrity, review this invariant matrix:
@@ -770,6 +821,20 @@ powershell -File testing/rag/test-phase5-rag.ps1
 - Precise citation generation (`[Doc: "Title" v1 #chunk-0]`).
 - Soft-delete lifecycle with immediate exclusion from search results.
 
+### Drill 5: Agentic AI & Human Approvals (`Phase 6`)
+```powershell
+powershell -File testing/ai/test-phase6-agent.ps1
+```
+*Validates (14/14 PASS):*
+- Workflow Service healthcheck (`status: UP` on port 8083).
+- Multi-tenant approval request generation for financial/high-risk actions.
+- Pending approval querying scoped strictly by tenant.
+- Strict RLS cross-tenant approval denial (HTTP 404).
+- Manager approval execution (transitions to `APPROVED`).
+- State machine re-approval rejection (HTTP 409 Conflict).
+- Manager rejection execution (transitions to `REJECTED`).
+- Full ticket audit trail preservation in PostgreSQL.
+
 ---
 
 ## Summary of Completed Phases
@@ -779,5 +844,5 @@ powershell -File testing/rag/test-phase5-rag.ps1
 - **Phase 3 (Core Ticketing Microservice):** Spring Boot 3.3.4, 6-table schema, 8-state machine, RFC 7807 problem details, AOP RLS interceptor.
 - **Phase 4 (Event-Driven Reliability):** Transactional outbox, 1-second poller relay, Kafka topics (`ticket.created.v1`), distributed idempotency engine.
 - **Phase 5 (Knowledge Management & Hybrid RAG):** S3 object archiving, Qdrant vector search, PostgreSQL full-text search, Reciprocal Rank Fusion, citations.
-- **Phase 6 (Agentic AI & Approvals):** LangGraph Multi-Agent Engine & Human Approvals.
+- **Phase 6 (Agentic AI & Human Approvals):** LangGraph multi-agent loop, safe tool execution, and Workflow human approvals engine.
 

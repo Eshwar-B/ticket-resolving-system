@@ -65,7 +65,7 @@ jobs:
 
       - name: Validate Flyway SQL Syntax
         run: |
-          for f in backend/ticket-service/src/main/resources/db/migration/*.sql; do
+          for f in backend/*/src/main/resources/db/migration/*.sql; do
             echo "Checking $f..."
             test -s "$f" || (echo "$f is empty" && exit 1)
           done

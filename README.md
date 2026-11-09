@@ -78,7 +78,7 @@ The **Enterprise AI Platform** is an enterprise-scale autonomous customer servic
 
 ---
 
-## 2. Current Delivery Status (Phase 1 – Phase 5)
+## 2. Current Delivery Status (Phase 1 – Phase 6)
 
 | Phase | Milestone | Technology | Status | Key Deliverables & Evidence |
 |---|---|---|---|---|
@@ -87,8 +87,8 @@ The **Enterprise AI Platform** is an enterprise-scale autonomous customer servic
 | **Phase 3** | **Core Ticket Service** | Spring Boot 3.3.4, Java 21, Flyway | **VERIFIED** | 6-table schema, 8-state machine, `test-ticket-isolation.ps1` (10/10 PASS) |
 | **Phase 4** | **Event-Driven Reliability** | Outbox, Idempotency, Kafka Topics | **VERIFIED** | Dual-write prevention, `test-phase4-reliability.ps1` (11/11 PASS) |
 | **Phase 5** | **Knowledge & Hybrid RAG** | S3 (S3Mock), Qdrant, Postgres FTS | **VERIFIED** | Ingestion, Reciprocal Rank Fusion, `test-phase5-rag.ps1` (12/12 PASS) |
-| **Phase 6** | **Agentic AI & Approvals** | LangGraph, Workflow Engine | *Next Active* | Multi-agent supervisor, human-in-the-loop approval engine |
-| **Phase 7** | **Observability & Audit** | OpenTelemetry, Phoenix, Prometheus | *Upcoming* | Tracing context propagation, tenant-scoped audit logging |
+| **Phase 6** | **Agentic AI & Approvals** | LangGraph, Workflow Engine | **VERIFIED** | Supervisor loop, HITL approvals, `test-phase6-agent.ps1` (14/14 PASS) |
+| **Phase 7** | **Observability & Audit** | OpenTelemetry, Phoenix, Prometheus | *Next Active* | Tracing context propagation, tenant-scoped audit logging |
 
 ---
 
@@ -219,7 +219,52 @@ tenants/{tenant_id}/...          512 chars / 64 overlap
 
 ---
 
-## 7. Hardware Discipline & Resource Profile (16 GB RAM Cap)
+## 7. Agentic AI & Human-in-the-Loop Approvals (Phase 6)
+
+Phase 6 implements the autonomous multi-agent resolution loop and human approval governance:
+
+```
+[ New Ticket Event (ticket.created.v1) ]
+                 │
+                 ▼
+       ┌──────────────────┐
+       │   Triage Agent   │ ── Intent Classification & Risk Tiering
+       └─────────┬────────┘
+                 │
+                 ▼
+       ┌──────────────────┐
+       │ Retrieval Agent  │ ── Queries Knowledge Service Hybrid RAG
+       └─────────┬────────┘
+                 │
+                 ▼
+       ┌──────────────────┐
+       │ Resolution Agent │ ── Formulates Grounded Plan & Checks Thresholds
+       └─────────┬────────┘
+                 │
+                 ▼
+       ┌──────────────────┐
+       │   Critic Agent   │ ── Validates Citations & Guardrail Safety
+       └─────────┬────────┘
+                 │
+        Safe? ───┴─── Financial / Irreversible?
+       ┌─────────────┴─────────────┐
+       ▼                           ▼
+[ Direct Autonomous ]      [ Workflow Service (Port 8083) ]
+- Add public resolution    - Record approval request in workflow_db
+- Add internal audit log   - Set ticket status to PENDING
+- Set ticket to RESOLVED   - Human Manager reviews and decides:
+                               ├─ APPROVE: Emits workflow.approval.granted.v1
+                               └─ REJECT:  Emits workflow.approval.denied.v1
+```
+
+### Safety & Governance Invariants
+1. **Zero Financial Self-Action:** AI agents are cryptographically and architecturally barred from issuing monetary refunds or irreversible deletions without human manager approval.
+2. **Mandatory Citations:** Every autonomous message directed to a customer must cite the verified knowledge base document (`[Doc: "Title" v1 #chunk-0]`).
+3. **Audit Trail Completeness:** All supervisor decisions, internal reasoning notes, and manager approval timestamps are stored permanently in PostgreSQL with RLS isolation.
+
+---
+
+## 8. Hardware Discipline & Resource Profile (16 GB RAM Cap)
 
 The platform is purpose-built to run sustainably on everyday developer hardware (16 GB RAM, 4 GB VRAM) with **₹0 cloud dependencies**:
 
@@ -230,11 +275,15 @@ The platform is purpose-built to run sustainably on everyday developer hardware 
 | `enterprise-ai-kafka` | `apache/kafka:3.8.0` | 1024 MiB | KRaft Broker + Controller | Event Streaming |
 | `enterprise-ai-keycloak` | `keycloak:24.0.5` | 768 MiB | `-Xmx384m` | OIDC Identity Provider |
 | `enterprise-ai-ticket-service` | `eclipse-temurin:21` | 384 MiB | `-Xmx256m` (G1GC) | Ticketing Control Plane |
-| **Total Measured Footprint** | | **~1250 MiB** | **~8% of 16 GB** | Safe headroom for Ollama |
+| `enterprise-ai-minio` | `adobe/s3mock:latest` | 256 MiB | In-Memory / Port 9090 | S3 Object Archiving |
+| `enterprise-ai-qdrant` | `qdrant/qdrant:latest` | 384 MiB | REST / Port 6333 | Vector Embeddings |
+| `enterprise-ai-knowledge-service` | `eclipse-temurin:21` | 384 MiB | `-Xmx256m` (G1GC) | Hybrid RAG Engine |
+| `enterprise-ai-workflow-service` | `eclipse-temurin:21` | 384 MiB | `-Xmx256m` (G1GC) | Human Approvals Engine |
+| **Total Measured Footprint** | | **~1950 MiB** | **~12% of 16 GB** | Safe headroom for Ollama |
 
 ---
 
-## 7. Getting Started & Local Quickstart
+## 9. Getting Started & Local Quickstart
 
 ### Prerequisites
 - **OS:** Windows 11 / Ubuntu 22.04+ / macOS 13+
@@ -308,6 +357,20 @@ powershell -File testing/rag/test-phase5-rag.ps1
 - Strict cross-tenant isolation (Zero leakage of Tenant Beta docs into Tenant Alpha queries)
 - Precise citation generation (`[Doc: "Title" v1 #chunk-0]`)
 - Soft-delete lifecycle with immediate exclusion from search results
+
+### 5. Agentic AI & Human Approvals (`Phase 6`)
+```powershell
+powershell -File testing/ai/test-phase6-agent.ps1
+```
+*Assertions (14/14 PASS):*
+- Workflow Service healthcheck (`status: UP` on port 8083)
+- Multi-tenant approval request generation for financial/high-risk actions
+- Pending approval querying scoped strictly by tenant
+- Strict RLS cross-tenant approval denial (HTTP 404)
+- Manager approval execution (transitions to `APPROVED`)
+- State machine re-approval rejection (HTTP 409 Conflict)
+- Manager rejection execution (transitions to `REJECTED`)
+- Full ticket audit trail preservation in PostgreSQL
 
 ---
 
