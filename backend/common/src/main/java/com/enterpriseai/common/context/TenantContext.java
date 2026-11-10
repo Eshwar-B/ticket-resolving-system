@@ -33,6 +33,10 @@ public final class TenantContext {
         );
     }
 
+    public static String getRequiredTenantId() {
+        return requireTenantId();
+    }
+
     public static void clear() {
         CURRENT_TENANT.remove();
     }

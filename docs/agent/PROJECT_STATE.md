@@ -1,7 +1,7 @@
 # Platform Project State (docs/project-state.md)
 
-**Current Phase:** Phase 7 — COMPLETE (Phases 1-7 fully verified)  
-**Next Phase:** Phase 8 — Product Completion & Minimal Admin Experience  
+**Current Phase:** Phase 8 — COMPLETE (Phases 1-8 fully verified)  
+**Next Phase:** Phase 9 — Security Hardening & Penetration Testing  
 **Last Updated:** 2026-11-10  
 **Operating Philosophy:** BUILD → VERIFY → DOCUMENT → REVERSE ENGINEER → EXPERIMENT  
 **Cost Model:** ₹0 (Local-First Open-Source Stack)  
@@ -61,3 +61,8 @@
 | **AI Evaluation Framework** | Python AI Plane | Phase 7 | **VERIFIED** | Golden dataset, TicketEvaluator (100% score), Regression gate |
 | **Semantic Cache & Context Mgr** | Python AI Plane | Phase 7 | **VERIFIED** | Redis tenant-scoped cache + token budget compression |
 | **Usage Metering Telemetry** | Python AI Plane | Phase 7 | **VERIFIED** | Kafka `usage.events.v1` + structured metrics recording |
+| **Notification Engine** | Notification Service Spring Boot | Phase 8 | **VERIFIED** | In-app alerts, HMAC webhooks, RLS isolation (`:8084`) |
+| **Append-Only Audit Service** | Usage Audit Spring Boot | Phase 8 | **VERIFIED** | Immutable audit log, usage metering, quotas (`:8085`) |
+| **Distributed Rate Limiting** | Java Common Library | Phase 8 | **VERIFIED** | Redis sliding window counter (`t:{tenant}:rl:{ep}:{min}`) |
+| **SLA Breach Detector** | Ticket Service Scheduled Worker | Phase 8 | **VERIFIED** | V4 migration, automated breach flagging & event publish |
+| **React 18 Admin Console** | Vite + React + TypeScript | Phase 8 | **VERIFIED** | Dashboard, Tickets, Approvals, Knowledge, Audit pages |

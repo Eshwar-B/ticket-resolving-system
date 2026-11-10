@@ -367,6 +367,80 @@ services:
       - app-network
 
   # ----------------------------------------------------------------------------
+  # Notification Service (In-App Notifications & Signed Webhook Delivery)
+  # ----------------------------------------------------------------------------
+  notification-service:
+    build:
+      context: ./backend
+      dockerfile: notification-service/Dockerfile
+    container_name: enterprise-ai-notification-service
+    restart: unless-stopped
+    profiles: ["core", "full"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/notification_db?stringtype=unspecified
+      SPRING_DATASOURCE_USERNAME: ${APP_DB_USER:-app_user}
+      SPRING_DATASOURCE_PASSWORD: ${APP_DB_PASSWORD:-app_user_password}
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      MANAGEMENT_TRACING_ENABLED: "false"
+      JAVA_TOOL_OPTIONS: "-Xmx256m -Xms128m -XX:+UseG1GC -XX:+UseContainerSupport"
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "${NOTIFICATION_SERVICE_PORT:-8084}:8084"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8084/actuator/health/liveness || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 384m
+    networks:
+      - app-network
+
+  # ----------------------------------------------------------------------------
+  # Usage & Audit Service (Append-Only Audit Logging & Metering)
+  # ----------------------------------------------------------------------------
+  usage-audit-service:
+    build:
+      context: ./backend
+      dockerfile: usage-audit-service/Dockerfile
+    container_name: enterprise-ai-usage-audit-service
+    restart: unless-stopped
+    profiles: ["core", "full"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/usage_db?stringtype=unspecified
+      SPRING_DATASOURCE_USERNAME: ${APP_DB_USER:-app_user}
+      SPRING_DATASOURCE_PASSWORD: ${APP_DB_PASSWORD:-app_user_password}
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      MANAGEMENT_TRACING_ENABLED: "false"
+      JAVA_TOOL_OPTIONS: "-Xmx256m -Xms128m -XX:+UseG1GC -XX:+UseContainerSupport"
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "${USAGE_AUDIT_SERVICE_PORT:-8085}:8085"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8085/actuator/health/liveness || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 384m
+    networks:
+      - app-network
+
+  # ----------------------------------------------------------------------------
   # Flyway Migration Tool (Repeatable schema migrations)
   # ----------------------------------------------------------------------------
   flyway:

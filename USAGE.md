@@ -849,6 +849,19 @@ powershell -File testing/ai/test-phase7-eval.ps1
 - CI regression gate threshold enforcement and candidate degradation blocking.
 - Structured AI usage metering and Kafka event publication (`usage.events.v1`).
 
+### Drill 7: Product Completion & Minimal Admin Experience (`Phase 8`)
+```powershell
+powershell -File testing/phase8/test-phase8-completion.ps1
+```
+*Validates (7/7 PASS):*
+- Sliding window rate limiting engine enforcing independent per-tenant per-endpoint quotas.
+- SLA breach detection Flyway migration (V4) and scheduled background breach detector.
+- In-App Notifications and signed HMAC Webhooks with PostgreSQL RLS kernel isolation.
+- Append-Only Audit Logging and Usage Metering with PostgreSQL RLS kernel isolation.
+- Multi-container Docker Compose topology validation with `notification-service` (:8084) and `usage-audit-service` (:8085).
+- React 18 / TypeScript / Vite Admin Console architecture (Dashboard, Tickets, Approvals, Knowledge, Audit).
+- Full Maven backend reactor compilation across all 9 microservices with 0 errors.
+
 ---
 
 ## Summary of Completed Phases
@@ -860,4 +873,5 @@ powershell -File testing/ai/test-phase7-eval.ps1
 - **Phase 5 (Knowledge Management & Hybrid RAG):** S3 object archiving, Qdrant vector search, PostgreSQL full-text search, Reciprocal Rank Fusion, citations.
 - **Phase 6 (Agentic AI & Human Approvals):** LangGraph multi-agent loop, safe tool execution, and Workflow human approvals engine.
 - **Phase 7 (AI Platform Governance, Evaluation & Versioning):** Model adapters, prompt versioning, golden dataset offline evaluation, CI regression gates, semantic caching, and token compression.
+- **Phase 8 (Product Completion & Minimal Admin Experience):** Notification engine (:8084), Usage/Audit service (:8085), Redis rate limiting, SLA breach background detector, and React 18 / TypeScript Operator Admin Console.
 
