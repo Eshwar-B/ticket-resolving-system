@@ -28,3 +28,4 @@ CREATE POLICY approval_requests_tenant_isolation ON approval_requests
 
 CREATE INDEX idx_approval_requests_tenant_ticket ON approval_requests (tenant_id, ticket_id);
 CREATE INDEX idx_approval_requests_tenant_status ON approval_requests (tenant_id, status);
+

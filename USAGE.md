@@ -835,6 +835,20 @@ powershell -File testing/ai/test-phase6-agent.ps1
 - Manager rejection execution (transitions to `REJECTED`).
 - Full ticket audit trail preservation in PostgreSQL.
 
+### Drill 6: AI Platform Governance, Evaluation & Versioning (`Phase 7`)
+```powershell
+powershell -File testing/ai/test-phase7-eval.ps1
+```
+*Validates (8/8 PASS):*
+- Model Adapter healthcheck and 384-dimensional dense embeddings.
+- Prompt Registry template versioning (v1, v2) with mandatory citation enforcement.
+- Workflow version activation, dynamic switching, and zero-downtime rollback.
+- Context Manager blueprint-ordered assembly with progressive token budget compression.
+- Semantic Cache strict tenant key scoping (`t:{tenant_id}:cache:{hash}`) with zero cross-tenant leakage.
+- Offline Golden Dataset benchmark sweep with composite accuracy score verification (>= 0.75).
+- CI regression gate threshold enforcement and candidate degradation blocking.
+- Structured AI usage metering and Kafka event publication (`usage.events.v1`).
+
 ---
 
 ## Summary of Completed Phases
@@ -845,4 +859,5 @@ powershell -File testing/ai/test-phase6-agent.ps1
 - **Phase 4 (Event-Driven Reliability):** Transactional outbox, 1-second poller relay, Kafka topics (`ticket.created.v1`), distributed idempotency engine.
 - **Phase 5 (Knowledge Management & Hybrid RAG):** S3 object archiving, Qdrant vector search, PostgreSQL full-text search, Reciprocal Rank Fusion, citations.
 - **Phase 6 (Agentic AI & Human Approvals):** LangGraph multi-agent loop, safe tool execution, and Workflow human approvals engine.
+- **Phase 7 (AI Platform Governance, Evaluation & Versioning):** Model adapters, prompt versioning, golden dataset offline evaluation, CI regression gates, semantic caching, and token compression.
 

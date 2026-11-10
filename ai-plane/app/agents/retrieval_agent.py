@@ -34,3 +34,4 @@ def run_retrieval(tenant_id: str, query: str, top_k: int = 3) -> Dict[str, Any]:
             "rag_context": "",
             "error": str(e)
         }
+

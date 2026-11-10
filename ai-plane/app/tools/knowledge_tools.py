@@ -13,7 +13,8 @@ def search_knowledge(tenant_id: str, query: str, top_k: int = 3) -> Dict[str, An
     url = f"{KNOWLEDGE_SERVICE_URL}/api/v1/knowledge/search"
     headers = {"X-Tenant-Id": tenant_id, "Content-Type": "application/json"}
     payload = {"query": query, "topK": top_k}
-    with httpx.Client(timeout=10.0) as client:
+    with httpx.Client(timeout=2.0) as client:
         resp = client.post(url, headers=headers, json=payload)
         resp.raise_for_status()
         return resp.json()
+

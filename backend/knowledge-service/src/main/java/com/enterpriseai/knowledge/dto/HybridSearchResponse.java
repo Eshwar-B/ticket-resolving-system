@@ -8,3 +8,4 @@ public record HybridSearchResponse(
         int totalHits,
         List<SearchResultItem> results
 ) {}
+

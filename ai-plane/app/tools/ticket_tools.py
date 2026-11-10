@@ -12,7 +12,7 @@ def get_ticket(ticket_id: str, tenant_id: str) -> Dict[str, Any]:
     """Fetches full ticket details including SLA, history, and status."""
     url = f"{TICKET_SERVICE_URL}/api/v1/tickets/{ticket_id}"
     headers = {"X-Tenant-Id": tenant_id}
-    with httpx.Client(timeout=10.0) as client:
+    with httpx.Client(timeout=3.0) as client:
         resp = client.get(url, headers=headers)
         resp.raise_for_status()
         return resp.json()
@@ -22,7 +22,7 @@ def update_ticket_status(ticket_id: str, tenant_id: str, target_status: str, not
     url = f"{TICKET_SERVICE_URL}/api/v1/tickets/{ticket_id}/status"
     headers = {"X-Tenant-Id": tenant_id, "Content-Type": "application/json"}
     body = {"targetStatus": target_status, "note": note or f"Updated by AI Agent to {target_status}"}
-    with httpx.Client(timeout=10.0) as client:
+    with httpx.Client(timeout=3.0) as client:
         resp = client.patch(url, headers=headers, json=body)
         resp.raise_for_status()
         return resp.json()
@@ -39,7 +39,8 @@ def add_ticket_comment(ticket_id: str, tenant_id: str, author_id: str, author_na
         "visibility": visibility,
         "body": body
     }
-    with httpx.Client(timeout=10.0) as client:
+    with httpx.Client(timeout=3.0) as client:
         resp = client.post(url, headers=headers, json=payload)
         resp.raise_for_status()
         return resp.json()
+

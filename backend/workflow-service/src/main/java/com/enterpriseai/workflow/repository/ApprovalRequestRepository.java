@@ -14,3 +14,4 @@ public interface ApprovalRequestRepository extends JpaRepository<ApprovalRequest
 
     List<ApprovalRequest> findByTenantIdAndStatusOrderByCreatedAtDesc(String tenantId, ApprovalRequest.ApprovalStatus status);
 }
+

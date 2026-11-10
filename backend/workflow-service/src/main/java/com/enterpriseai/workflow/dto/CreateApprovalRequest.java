@@ -10,3 +10,4 @@ public record CreateApprovalRequest(
         String payload,
         String requester
 ) {}
+

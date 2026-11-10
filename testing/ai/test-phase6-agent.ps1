@@ -125,3 +125,4 @@ Assert-Condition ($ticketApprovals.Count -ge 2) "Ticket audit log contains both 
 Write-Host "`n========================================================" -ForegroundColor Green
 Write-Host "ALL PHASE 6 AGENT & APPROVAL TESTS PASSED (14/14)!" -ForegroundColor Green
 Write-Host "========================================================" -ForegroundColor Green
+

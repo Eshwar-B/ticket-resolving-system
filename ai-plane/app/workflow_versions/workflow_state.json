@@ -1,0 +1,26 @@
+{
+  "active_version": "wf-v1.1.0",
+  "workflows": {
+    "wf-v1.0.0": {
+      "version_id": "wf-v1.0.0",
+      "name": "Standard Autonomous Resolution",
+      "prompt_version": "v1",
+      "model_name": "llama3:8b",
+      "is_active": false,
+      "traffic_percentage": 0,
+      "deployed_at": "2026-11-01T10:00:00Z",
+      "changelog": "Initial baseline multi-agent loop with basic triage and RAG retrieval"
+    },
+    "wf-v1.1.0": {
+      "version_id": "wf-v1.1.0",
+      "name": "Strict Guardrails & RRF Hybrid RAG",
+      "prompt_version": "v2",
+      "model_name": "llama3:8b",
+      "is_active": true,
+      "traffic_percentage": 100,
+      "deployed_at": "2026-11-09T12:00:00Z",
+      "changelog": "Added critic agent verification, strict citations, and human approval for financial refund requests"
+    }
+  },
+  "updated_at": "2026-11-10T11:43:32.181031+00:00"
+}

@@ -52,3 +52,4 @@ def run_resolution(ticket: Dict[str, Any], triage: Dict[str, Any],
         "internal_note": internal_note,
         "citations": citations
     }
+

@@ -18,3 +18,4 @@ public interface DocumentRepository extends JpaRepository<Document, UUID> {
 
     Optional<Document> findByTenantIdAndContentHash(String tenantId, String contentHash);
 }
+

@@ -6,3 +6,4 @@ public record ApprovalDecisionRequest(
         @NotBlank String approver,
         String note
 ) {}
+

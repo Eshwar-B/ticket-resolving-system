@@ -9,3 +9,4 @@ public record HybridSearchRequest(
         Integer limit,
         Double minScore
 ) {}
+

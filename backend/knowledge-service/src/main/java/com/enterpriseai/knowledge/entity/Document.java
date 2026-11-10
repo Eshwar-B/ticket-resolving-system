@@ -113,3 +113,4 @@ public class Document {
     public List<DocumentChunk> getChunks() { return chunks; }
     public void setChunks(List<DocumentChunk> chunks) { this.chunks = chunks; }
 }
+

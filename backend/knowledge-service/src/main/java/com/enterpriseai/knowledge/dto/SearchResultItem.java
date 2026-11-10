@@ -13,3 +13,4 @@ public record SearchResultItem(
         String retrievalMethod,
         String citation
 ) {}
+

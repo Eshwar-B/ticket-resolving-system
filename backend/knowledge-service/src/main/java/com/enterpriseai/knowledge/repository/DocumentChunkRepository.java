@@ -31,3 +31,4 @@ public interface DocumentChunkRepository extends JpaRepository<DocumentChunk, UU
             @Param("limit") int limit
     );
 }
+

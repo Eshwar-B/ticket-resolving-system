@@ -19,7 +19,7 @@ def request_human_approval(tenant_id: str, ticket_id: str, action_type: str,
         "payload": payload,
         "requester": requester
     }
-    with httpx.Client(timeout=10.0) as client:
+    with httpx.Client(timeout=3.0) as client:
         resp = client.post(url, headers=headers, json=body)
         resp.raise_for_status()
         return resp.json()
@@ -28,7 +28,8 @@ def get_ticket_approvals(tenant_id: str, ticket_id: str) -> list:
     """Fetches all approval requests associated with a ticket."""
     url = f"{WORKFLOW_SERVICE_URL}/api/v1/approvals/ticket/{ticket_id}"
     headers = {"X-Tenant-Id": tenant_id}
-    with httpx.Client(timeout=10.0) as client:
+    with httpx.Client(timeout=3.0) as client:
         resp = client.get(url, headers=headers)
         resp.raise_for_status()
         return resp.json()
+

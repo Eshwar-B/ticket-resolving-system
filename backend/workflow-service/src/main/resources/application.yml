@@ -57,3 +57,4 @@ logging:
   level:
     root: INFO
     com.enterpriseai: DEBUG
+

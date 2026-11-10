@@ -12,3 +12,4 @@ public record DocumentUploadRequest(
         String sourceType,
         String[] permissions
 ) {}
+

@@ -2,6 +2,7 @@
 Triage Agent for AI Resolution Plane.
 Extracts ticket intent, validates category, assesses urgency, and flags actions requiring escalation.
 """
+import re
 from typing import Dict, Any
 
 def run_triage(ticket: Dict[str, Any]) -> Dict[str, Any]:
@@ -12,15 +13,15 @@ def run_triage(ticket: Dict[str, Any]) -> Dict[str, Any]:
 
     # Detect financial / irreversible keywords requiring Human-in-the-Loop approval
     financial_keywords = ["refund", "chargeback", "credit", "reimburse", "compensation", "payout", "cancel order", "restocking"]
-    is_financial = any(kw in full_text for kw in financial_keywords)
+    is_financial = any(re.search(rf"\b{re.escape(kw)}\b", full_text) for kw in financial_keywords)
 
-    # Determine intent category
-    if any(kw in full_text for kw in ["refund", "return", "broken", "damaged", "exchange"]):
-        detected_category = "RETURN_REFUND"
-    elif any(kw in full_text for kw in ["login", "password", "auth", "token", "access"]):
+    # Determine intent category with word boundaries
+    if any(re.search(rf"\b{re.escape(kw)}\b", full_text) for kw in ["login", "password", "auth", "token", "access"]):
         detected_category = "ACCOUNT_ACCESS"
-    elif any(kw in full_text for kw in ["slow", "bug", "crash", "error", "down", "offline"]):
+    elif any(re.search(rf"\b{re.escape(kw)}\b", full_text) for kw in ["slow", "bug", "crash", "error", "errors", "down", "offline", "outage"]):
         detected_category = "TECHNICAL_ISSUE"
+    elif any(re.search(rf"\b{re.escape(kw)}\b", full_text) for kw in ["refund", "return", "broken", "damaged", "exchange"]):
+        detected_category = "RETURN_REFUND"
     else:
         detected_category = ticket.get("category", "GENERAL_INQUIRY")
 
@@ -35,3 +36,4 @@ def run_triage(ticket: Dict[str, Any]) -> Dict[str, Any]:
         "recommended_priority": priority,
         "requires_human_approval": is_financial
     }
+

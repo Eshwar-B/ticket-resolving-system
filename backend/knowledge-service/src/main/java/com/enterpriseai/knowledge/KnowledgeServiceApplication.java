@@ -14,3 +14,4 @@ public class KnowledgeServiceApplication {
         SpringApplication.run(KnowledgeServiceApplication.class, args);
     }
 }
+

@@ -27,3 +27,4 @@ def run_critic(resolution: Dict[str, Any], retrieval: Dict[str, Any]) -> Dict[st
         "passed_guardrails": passed_guardrails,
         "is_safe_to_dispatch": passed_guardrails
     }
+

@@ -67,3 +67,4 @@ public class KnowledgeController {
         return ResponseEntity.noContent().build();
     }
 }
+

@@ -62,3 +62,4 @@ CREATE INDEX idx_chunks_fts ON document_chunks USING gin (fts_vector);
 -- 3. Grants for app_user
 GRANT SELECT, INSERT, UPDATE, DELETE ON documents TO app_user;
 GRANT SELECT, INSERT, UPDATE, DELETE ON document_chunks TO app_user;
+

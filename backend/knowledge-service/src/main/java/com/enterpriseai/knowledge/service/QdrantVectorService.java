@@ -211,3 +211,4 @@ public class QdrantVectorService {
 
     public record VectorSearchResult(UUID chunkId, UUID documentId, int chunkIndex, double score) {}
 }
+
