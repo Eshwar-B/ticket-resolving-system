@@ -899,6 +899,46 @@ powershell -File testing/devops/test-phase11-devops.ps1
 - Terraform AWS Cloud reference architecture (VPC, EKS, RDS PostgreSQL Multi-AZ, MSK Kafka, S3).
 - Strict adherence to ₹0 cloud cost governance mandate.
 
+### Drill 11: Performance, Experiments & Disaster Recovery (`Phase 12`)
+```powershell
+powershell -File testing/performance/test-phase12-performance.ps1
+```
+*Validates (14/14 PASS):*
+- k6 load testing scripts for synchronous ticket ingestion and hybrid RAG retrieval.
+- Automated synthetic multi-tenant benchmark dataset generation (`scripts/generate-benchmark-data.ps1`).
+- `EXPLAIN (ANALYZE, BUFFERS)` query plan benchmarks for composite indexes and GIN full-text search.
+- Capacity planning models across 1k, 10k, and 100k tickets/day with peak QPS specifications.
+- Atomic multi-database backup and restore automation (`scripts/backup-restore.ps1`).
+- Disaster recovery procedures with measured RPO (< 1 minute) and RTO (< 15 minutes).
+
+---
+
+## Performance Benchmarks & Disaster Recovery (Phase 12)
+
+### Running k6 Load Tests
+```bash
+# 1. Ticket Ingestion Load Test (P95 < 300ms)
+k6 run testing/load/ticket-creation-load.js
+
+# 2. Hybrid RAG Search Load Test (P95 < 400ms)
+k6 run testing/load/hybrid-rag-load.js
+```
+
+### Generating Benchmark Data
+```powershell
+# Generate 10,000 synthetic tickets distributed across tenants
+powershell -File scripts/generate-benchmark-data.ps1 -Count 10000 -OutputPath testing/benchmark-10k.json
+```
+
+### Performing Atomic Backups & Recovery Drills
+```powershell
+# Create atomic backup across all 6 service databases
+powershell -File scripts/backup-restore.ps1 -Action backup
+
+# Verify backup integrity
+powershell -File scripts/backup-restore.ps1 -Action verify
+```
+
 ---
 
 ## Kubernetes & Cloud Orchestration (Phase 11)
@@ -970,4 +1010,5 @@ The platform includes an observability profile:
 - **Phase 9 (Security Hardening & OWASP Defense):** STRIDE threat model, OWASP Top 10 + LLM Top 10 compliance matrix, input/output guardrails, and secret hygiene verification.
 - **Phase 10 (Observability & Operations):** Prometheus multi-service metrics, 6 critical Alertmanager rules, Grafana dashboards, W3C distributed trace propagation, and 5 operational incident triage runbooks.
 - **Phase 11 (Kubernetes & Cloud DevOps):** Local `kind` cluster topology, 14 K8s manifests, non-root security contexts, memory caps, default-deny NetworkPolicies, KEDA Kafka autoscaler, and Terraform AWS reference architecture ($0 spend).
+- **Phase 12 (Performance, Experiments & Disaster Recovery):** k6 load scripts, 10k-100k synthetic data generator, PostgreSQL EXPLAIN ANALYZE query plans, atomic backup/restore automation, and measured RPO (< 1m) / RTO (< 15m) disaster recovery drills.
 
