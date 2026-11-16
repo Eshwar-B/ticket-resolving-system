@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: knowledge-service
+  namespace: enterprise-ai
+  labels:
+    app: knowledge-service
+    app.kubernetes.io/name: knowledge-service
+    app.kubernetes.io/part-of: enterprise-ai-platform
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: knowledge-service
+  template:
+    metadata:
+      labels:
+        app: knowledge-service
+        app.kubernetes.io/name: knowledge-service
+        app.kubernetes.io/part-of: enterprise-ai-platform
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+      containers:
+        - name: knowledge-service
+          image: enterprise-ai/knowledge-service:0.1.0-SNAPSHOT
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: platform-config
+            - secretRef:
+                name: platform-secrets
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://postgres.enterprise-ai.svc.cluster.local:5432/knowledge_db?stringtype=unspecified"
+          ports:
+            - containerPort: 8082
+              name: http
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "192Mi"
+            limits:
+              cpu: "500m"
+              memory: "384Mi"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8082
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8082
+            initialDelaySeconds: 20
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: knowledge-service
+  namespace: enterprise-ai
+  labels:
+    app: knowledge-service
+    app.kubernetes.io/part-of: enterprise-ai-platform
+spec:
+  type: ClusterIP
+  selector:
+    app: knowledge-service
+  ports:
+    - name: http
+      port: 8082
+      targetPort: 8082

@@ -885,6 +885,44 @@ powershell -File testing/observability/test-phase10-observability.ps1
 - Operational incident response runbooks (Kafka lag, DLQ replay, DB pool exhaustion, Ollama degradation, Tenant isolation breach).
 - Multi-service Maven compilation reactor across all 9 modules with 0 errors.
 
+### Drill 10: Local Kubernetes & Cloud DevOps (`Phase 11`)
+```powershell
+powershell -File testing/devops/test-phase11-devops.ps1
+```
+*Validates (26/26 PASS):*
+- Multi-node kind cluster topology specification (`infra/k8s/kind-cluster.yaml`).
+- 14 Kubernetes manifests with non-root security contexts (`runAsNonRoot: true`, user 10001).
+- Resource constraints honoring memory caps (<= 384MiB per microservice).
+- Liveness and readiness health probes for every service deployment.
+- Strict NetworkPolicy default-deny-all ingress and egress isolation.
+- KEDA ScaledObject event-driven autoscaling based on Kafka consumer lag on `ticket.created.v1`.
+- Terraform AWS Cloud reference architecture (VPC, EKS, RDS PostgreSQL Multi-AZ, MSK Kafka, S3).
+- Strict adherence to ₹0 cloud cost governance mandate.
+
+---
+
+## Kubernetes & Cloud Orchestration (Phase 11)
+
+### Running on Local Kubernetes (`kind`)
+The platform can be orchestrated locally on Kubernetes at ₹0 cost:
+1. **Create the Local Cluster:**
+   ```bash
+   kind create cluster --config infra/k8s/kind-cluster.yaml
+   ```
+2. **Apply Kustomize Base:**
+   ```bash
+   kubectl apply -k infra/k8s/
+   ```
+3. **Verify Pods & Probes:**
+   ```bash
+   kubectl get pods -n enterprise-ai
+   ```
+4. **Observe Event-Driven Auto-Scaling (KEDA):**
+   When high ticket ingestion occurs, KEDA automatically monitors Kafka consumer lag on `ticket.created.v1` and scales the `ai-plane` worker pods from 1 replica up to 5 replicas.
+
+### Cloud Architecture & ₹0 Cost Notice
+Full Terraform modules are authored in `infra/terraform/` providing an AWS migration path. As documented in [`infra/terraform/cost-estimate.md`](file:///d:/Capstone%20projects/ticket%20resolving%20system/infra/terraform/cost-estimate.md), this reference architecture is validated and cost-estimated (~$429/month) but **never applied**, ensuring strictly ₹0 cloud spend.
+
 ---
 
 ## Observability, Monitoring & Operations
@@ -931,4 +969,5 @@ The platform includes an observability profile:
 - **Phase 8 (Product Completion & Minimal Admin Experience):** Notification engine (:8084), Usage/Audit service (:8085), Redis rate limiting, SLA breach background detector, and React 18 / TypeScript Operator Admin Console.
 - **Phase 9 (Security Hardening & OWASP Defense):** STRIDE threat model, OWASP Top 10 + LLM Top 10 compliance matrix, input/output guardrails, and secret hygiene verification.
 - **Phase 10 (Observability & Operations):** Prometheus multi-service metrics, 6 critical Alertmanager rules, Grafana dashboards, W3C distributed trace propagation, and 5 operational incident triage runbooks.
+- **Phase 11 (Kubernetes & Cloud DevOps):** Local `kind` cluster topology, 14 K8s manifests, non-root security contexts, memory caps, default-deny NetworkPolicies, KEDA Kafka autoscaler, and Terraform AWS reference architecture ($0 spend).
 

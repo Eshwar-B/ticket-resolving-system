@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: platform-config
+  namespace: enterprise-ai
+data:
+  ENVIRONMENT: "local-k8s"
+  POSTGRES_HOST: "postgres.enterprise-ai.svc.cluster.local"
+  POSTGRES_PORT: "5432"
+  REDIS_HOST: "redis.enterprise-ai.svc.cluster.local"
+  REDIS_PORT: "6379"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka.enterprise-ai.svc.cluster.local:9092"
+  QDRANT_HOST: "qdrant.enterprise-ai.svc.cluster.local"
+  QDRANT_PORT: "6333"
+  MINIO_ENDPOINT: "http://minio.enterprise-ai.svc.cluster.local:9090"
+  MANAGEMENT_TRACING_ENABLED: "false"
+  JAVA_TOOL_OPTIONS: "-Xmx256m -Xms128m -XX:+UseG1GC -XX:+UseContainerSupport"

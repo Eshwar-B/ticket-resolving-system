@@ -1,0 +1,21 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ticket-service-pdb
+  namespace: enterprise-ai
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: ticket-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ai-plane-pdb
+  namespace: enterprise-ai
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: ai-plane
