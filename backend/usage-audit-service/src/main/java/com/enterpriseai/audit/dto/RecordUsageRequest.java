@@ -10,3 +10,4 @@ public record RecordUsageRequest(
     String unit,
     BigDecimal costEstimate
 ) {}
+

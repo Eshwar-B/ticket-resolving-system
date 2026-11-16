@@ -83,3 +83,4 @@ class VersionStore:
 
     def rollback(self, target_version_id: str) -> Dict[str, Any]:
         return self.activate_version(target_version_id)
+

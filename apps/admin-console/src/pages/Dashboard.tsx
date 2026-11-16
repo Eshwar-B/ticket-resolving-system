@@ -70,3 +70,4 @@ export const Dashboard: React.FC<DashboardProps> = ({ tenantId }) => {
     </div>
   );
 };
+

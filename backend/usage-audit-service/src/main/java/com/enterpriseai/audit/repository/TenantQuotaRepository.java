@@ -11,3 +11,4 @@ import java.util.UUID;
 public interface TenantQuotaRepository extends JpaRepository<TenantQuota, UUID> {
     Optional<TenantQuota> findByTenantId(String tenantId);
 }
+

@@ -7,3 +7,4 @@ public record UsageSummaryResponse(
     Map<String, Long> quantityByService,
     long totalRecords
 ) {}
+

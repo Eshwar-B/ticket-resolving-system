@@ -14,3 +14,4 @@ public record NotificationResponse(
     Instant createdAt,
     Instant readAt
 ) {}
+

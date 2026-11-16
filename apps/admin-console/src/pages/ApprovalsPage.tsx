@@ -123,3 +123,4 @@ export const ApprovalsPage: React.FC<ApprovalsPageProps> = ({ tenantId }) => {
     </div>
   );
 };
+

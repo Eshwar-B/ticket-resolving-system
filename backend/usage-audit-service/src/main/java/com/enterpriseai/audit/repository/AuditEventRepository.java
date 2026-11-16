@@ -12,3 +12,4 @@ import java.util.UUID;
 public interface AuditEventRepository extends JpaRepository<AuditEvent, UUID> {
     Page<AuditEvent> findByTenantIdOrderByCreatedAtDesc(String tenantId, Pageable pageable);
 }
+

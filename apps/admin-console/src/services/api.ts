@@ -107,3 +107,4 @@ export const fetchNotifications = async (tenantId: string, userId: string): Prom
   const data = await res.json();
   return data.content || [];
 };
+

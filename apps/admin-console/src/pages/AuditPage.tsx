@@ -67,3 +67,4 @@ export const AuditPage: React.FC<AuditPageProps> = ({ tenantId }) => {
     </div>
   );
 };
+

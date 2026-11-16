@@ -13,3 +13,4 @@ public interface WebhookSubscriptionRepository extends JpaRepository<WebhookSubs
     List<WebhookSubscription> findByTenantIdAndIsActiveTrue(String tenantId);
     Optional<WebhookSubscription> findByIdAndTenantId(UUID id, String tenantId);
 }
+

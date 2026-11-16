@@ -24,3 +24,4 @@ def activate_workflow_version(version_id: str) -> Dict[str, Any]:
 
 def rollback_workflow_version(target_version_id: str) -> Dict[str, Any]:
     return get_version_store().rollback(target_version_id)
+

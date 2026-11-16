@@ -90,7 +90,8 @@ The **Enterprise AI Platform** is an enterprise-scale autonomous customer servic
 | **Phase 6** | **Agentic AI & Approvals** | LangGraph, Workflow Engine | **VERIFIED** | Supervisor loop, HITL approvals, `test-phase6-agent.ps1` (14/14 PASS) |
 | **Phase 7** | **AI Governance & Evaluation**| Evaluation, Versioning, Adapters | **VERIFIED** | Golden benchmark, regression gate, `test-phase7-eval.ps1` (8/8 PASS) |
 | **Phase 8** | **Product Completion & Admin** | Notifications, Audit, React UI | **VERIFIED** | In-app/webhooks, audit engine, React console, `test-phase8-completion.ps1` (7/7 PASS) |
-| **Phase 9** | **Security Hardening** | OWASP Top 10, LLM Red-Teaming | *Next Active* | Prompt injection, penetration testing, secret scanning |
+| **Phase 9** | **Security Hardening** | OWASP Top 10, LLM Guardrails | **VERIFIED** | STRIDE model, injection defense, PII masking, `test-phase9-security.ps1` (6/6 PASS) |
+| **Phase 10** | **Observability & Operations** | OpenTelemetry, Prometheus, OTLP | *Next Active* | OTel tracing, Prometheus alerts, Grafana, runbooks |
 
 ---
 
@@ -398,6 +399,18 @@ powershell -File testing/phase8/test-phase8-completion.ps1
 - Docker Compose topology validation with `notification-service` and `usage-audit-service`
 - React 18 / TypeScript / Vite Admin Console architecture (Dashboard, Tickets, Approvals, Knowledge, Audit)
 - Full Maven backend reactor compilation across all 9 microservices with 0 errors
+
+### 8. Security Hardening & OWASP LLM Defense (`Phase 9`)
+```powershell
+powershell -File testing/security/test-phase9-security.ps1
+```
+*Assertions (6/6 PASS):*
+- Prompt injection defense blocking direct and indirect adversarial overrides (OWASP LLM01)
+- Sensitive data & PII masking for SSNs, credit cards, emails, and phone numbers (OWASP LLM06)
+- Output safety guardrail preventing unauthorized commitments and ungrounded claims (OWASP LLM08)
+- Webhook HMAC-SHA256 signature verification and tamper rejection
+- PostgreSQL kernel Row-Level Security verification across all service migration schemas
+- Secret hygiene scanner confirming zero committed private keys or cloud credentials
 - Manager approval execution (transitions to `APPROVED`)
 - State machine re-approval rejection (HTTP 409 Conflict)
 - Manager rejection execution (transitions to `REJECTED`)

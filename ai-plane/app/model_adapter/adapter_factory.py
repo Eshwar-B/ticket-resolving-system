@@ -27,3 +27,4 @@ def set_model_adapter(adapter: BaseModelAdapter) -> None:
     """Explicitly override model adapter (useful for testing)."""
     global _current_adapter
     _current_adapter = adapter
+

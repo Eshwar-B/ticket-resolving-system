@@ -73,3 +73,4 @@ export const TicketsPage: React.FC<TicketsPageProps> = ({ tenantId }) => {
     </div>
   );
 };
+

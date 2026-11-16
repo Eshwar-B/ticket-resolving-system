@@ -98,3 +98,4 @@ def get_metrics_summary() -> Dict[str, Any]:
         "byWorkflowVersion": _METRICS_STORE["by_workflow_version"],
         "recentEventsCount": len(_METRICS_STORE["recent_events"]),
     }
+

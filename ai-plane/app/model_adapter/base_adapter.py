@@ -39,3 +39,4 @@ class BaseModelAdapter(ABC):
     def health_check(self) -> Dict[str, Any]:
         """Returns provider availability, latency, and loaded models."""
         pass
+

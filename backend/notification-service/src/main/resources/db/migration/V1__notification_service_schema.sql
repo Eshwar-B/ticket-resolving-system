@@ -74,3 +74,4 @@ CREATE POLICY deliveries_tenant_isolation ON webhook_deliveries
 GRANT ALL ON notifications TO app_user;
 GRANT ALL ON webhook_subscriptions TO app_user;
 GRANT ALL ON webhook_deliveries TO app_user;
+

@@ -13,3 +13,4 @@ COPY --from=builder /app/notification-service/target/notification-service-0.1.0-
 
 EXPOSE 8084
 ENTRYPOINT ["java", "-jar", "app.jar"]
+

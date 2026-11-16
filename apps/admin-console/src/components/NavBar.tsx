@@ -69,3 +69,4 @@ export const NavBar: React.FC<NavBarProps> = ({ tenantId, onTenantChange }) => {
     </nav>
   );
 };
+

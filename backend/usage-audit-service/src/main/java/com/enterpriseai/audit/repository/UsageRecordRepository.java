@@ -16,3 +16,4 @@ public interface UsageRecordRepository extends JpaRepository<UsageRecord, UUID> 
     @Query("SELECT r.service, SUM(r.quantity) FROM UsageRecord r WHERE r.tenantId = :tenantId GROUP BY r.service")
     List<Object[]> sumQuantityByService(@Param("tenantId") String tenantId);
 }
+

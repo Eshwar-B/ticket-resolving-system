@@ -48,3 +48,4 @@ public class TenantTransactionInterceptor {
         return joinPoint.proceed();
     }
 }
+

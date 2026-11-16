@@ -55,3 +55,4 @@ public class UsageRecord {
     public BigDecimal getCostEstimate() { return costEstimate; }
     public Instant getRecordedAt() { return recordedAt; }
 }
+

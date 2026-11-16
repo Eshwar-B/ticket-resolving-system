@@ -13,3 +13,4 @@ public class UsageAuditServiceApplication {
         SpringApplication.run(UsageAuditServiceApplication.class, args);
     }
 }
+

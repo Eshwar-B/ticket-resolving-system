@@ -14,3 +14,4 @@ public record AuditEventResponse(
     String traceId,
     Instant createdAt
 ) {}
+

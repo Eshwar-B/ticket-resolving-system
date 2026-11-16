@@ -10,3 +10,4 @@ public record WebhookResponse(
     boolean isActive,
     Instant createdAt
 ) {}
+

@@ -100,3 +100,4 @@ class MockModelAdapter(BaseModelAdapter):
             "embedding_dim": self.embedding_dimension,
             "latency_ms": 1.2,
         }
+

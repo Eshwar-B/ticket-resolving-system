@@ -114,3 +114,4 @@ class OllamaModelAdapter(BaseModelAdapter):
                 "fallback": self._fallback.health_check(),
             }
         return {"status": "UNKNOWN"}
+

@@ -48,3 +48,4 @@ public class UsageAuditController {
         return ResponseEntity.ok(usageAuditService.getTenantQuota());
     }
 }
+

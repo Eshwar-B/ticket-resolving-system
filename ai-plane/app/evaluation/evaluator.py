@@ -48,3 +48,4 @@ class TicketEvaluator:
             "score": round(score, 2),
             "passed": (score >= 0.75),
         }
+

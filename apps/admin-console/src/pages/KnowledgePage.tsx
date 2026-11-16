@@ -63,3 +63,4 @@ export const KnowledgePage: React.FC<KnowledgePageProps> = ({ tenantId }) => {
     </div>
   );
 };
+

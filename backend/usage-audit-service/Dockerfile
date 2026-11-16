@@ -13,3 +13,4 @@ COPY --from=builder /app/usage-audit-service/target/usage-audit-service-0.1.0-SN
 
 EXPOSE 8085
 ENTRYPOINT ["java", "-jar", "app.jar"]
+

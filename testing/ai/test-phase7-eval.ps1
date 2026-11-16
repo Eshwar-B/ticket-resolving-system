@@ -135,3 +135,4 @@ if ($LASTEXITCODE -ne 0) {
     Write-Host "PHASE 7 TEST SUITE FAILED!" -ForegroundColor Red
     exit 1
 }
+

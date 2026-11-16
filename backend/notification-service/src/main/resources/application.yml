@@ -42,3 +42,4 @@ management:
       show-details: when_authorized
       probes:
         enabled: true
+

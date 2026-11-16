@@ -102,3 +102,4 @@ def get_semantic_cache() -> SemanticCache:
     if _cache_instance is None:
         _cache_instance = SemanticCache()
     return _cache_instance
+

@@ -48,3 +48,4 @@ public class WebhookSubscription {
     public void setActive(boolean active) { isActive = active; }
     public Instant getCreatedAt() { return createdAt; }
 }
+

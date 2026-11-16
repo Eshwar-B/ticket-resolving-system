@@ -77,3 +77,4 @@ CREATE POLICY quotas_tenant_isolation ON tenant_quotas
 GRANT ALL ON audit_events TO app_user;
 GRANT ALL ON usage_records TO app_user;
 GRANT ALL ON tenant_quotas TO app_user;
+

@@ -8,3 +8,4 @@ public record CreateNotificationRequest(
     @NotBlank String title,
     @NotBlank String body
 ) {}
+

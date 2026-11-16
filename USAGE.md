@@ -862,6 +862,18 @@ powershell -File testing/phase8/test-phase8-completion.ps1
 - React 18 / TypeScript / Vite Admin Console architecture (Dashboard, Tickets, Approvals, Knowledge, Audit).
 - Full Maven backend reactor compilation across all 9 microservices with 0 errors.
 
+### Drill 8: Security Hardening & OWASP LLM Defense (`Phase 9`)
+```powershell
+powershell -File testing/security/test-phase9-security.ps1
+```
+*Validates (6/6 PASS):*
+- Prompt injection & jailbreak defense detecting adversarial attacks and approving benign queries.
+- Sensitive PII redaction (SSN, credit card, phone, email).
+- Output safety gating preventing unauthorized financial commitments and ungrounded policy claims.
+- Webhook HMAC-SHA256 signature verification and tamper detection.
+- Row-Level Security active across all database service schemas.
+- Secret hygiene scanner confirming clean repository state.
+
 ---
 
 ## Summary of Completed Phases
@@ -874,4 +886,5 @@ powershell -File testing/phase8/test-phase8-completion.ps1
 - **Phase 6 (Agentic AI & Human Approvals):** LangGraph multi-agent loop, safe tool execution, and Workflow human approvals engine.
 - **Phase 7 (AI Platform Governance, Evaluation & Versioning):** Model adapters, prompt versioning, golden dataset offline evaluation, CI regression gates, semantic caching, and token compression.
 - **Phase 8 (Product Completion & Minimal Admin Experience):** Notification engine (:8084), Usage/Audit service (:8085), Redis rate limiting, SLA breach background detector, and React 18 / TypeScript Operator Admin Console.
+- **Phase 9 (Security Hardening & OWASP Defense):** STRIDE threat model, OWASP Top 10 + LLM Top 10 compliance matrix, input/output guardrails, and secret hygiene verification.
 

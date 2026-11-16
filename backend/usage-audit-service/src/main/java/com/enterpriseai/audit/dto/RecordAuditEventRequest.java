@@ -10,3 +10,4 @@ public record RecordAuditEventRequest(
     String payload,
     String traceId
 ) {}
+

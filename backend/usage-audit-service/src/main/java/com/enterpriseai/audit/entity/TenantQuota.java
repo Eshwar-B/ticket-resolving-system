@@ -44,3 +44,4 @@ public class TenantQuota {
     public int getStorageLimitMb() { return storageLimitMb; }
     public Instant getUpdatedAt() { return updatedAt; }
 }
+

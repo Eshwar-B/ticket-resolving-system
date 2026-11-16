@@ -66,3 +66,4 @@ class RegressionChecker:
             "is_regression": is_regression,
             "approved": not is_regression,
         }
+

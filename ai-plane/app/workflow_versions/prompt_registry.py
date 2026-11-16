@@ -51,3 +51,4 @@ class PromptRegistry:
     @staticmethod
     def list_versions() -> list[str]:
         return list(PROMPT_VERSIONS.keys())
+

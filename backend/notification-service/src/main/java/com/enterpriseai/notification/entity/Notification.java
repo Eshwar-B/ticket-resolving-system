@@ -69,3 +69,4 @@ public class Notification {
     public Instant getCreatedAt() { return createdAt; }
     public Instant getReadAt() { return readAt; }
 }
+

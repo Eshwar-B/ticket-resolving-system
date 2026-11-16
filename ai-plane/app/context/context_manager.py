@@ -110,3 +110,4 @@ class ContextManager:
             "retained_history_turns": len(included_history),
             "citations_preserved": len(retrieved_chunks),
         }
+

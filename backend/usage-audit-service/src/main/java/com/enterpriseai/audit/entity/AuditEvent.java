@@ -59,3 +59,4 @@ public class AuditEvent {
     public String getTraceId() { return traceId; }
     public Instant getCreatedAt() { return createdAt; }
 }
+
