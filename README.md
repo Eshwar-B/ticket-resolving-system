@@ -91,7 +91,8 @@ The **Enterprise AI Platform** is an enterprise-scale autonomous customer servic
 | **Phase 7** | **AI Governance & Evaluation**| Evaluation, Versioning, Adapters | **VERIFIED** | Golden benchmark, regression gate, `test-phase7-eval.ps1` (8/8 PASS) |
 | **Phase 8** | **Product Completion & Admin** | Notifications, Audit, React UI | **VERIFIED** | In-app/webhooks, audit engine, React console, `test-phase8-completion.ps1` (7/7 PASS) |
 | **Phase 9** | **Security Hardening** | OWASP Top 10, LLM Guardrails | **VERIFIED** | STRIDE model, injection defense, PII masking, `test-phase9-security.ps1` (6/6 PASS) |
-| **Phase 10** | **Observability & Operations** | OpenTelemetry, Prometheus, OTLP | *Next Active* | OTel tracing, Prometheus alerts, Grafana, runbooks |
+| **Phase 10** | **Observability & Operations** | OpenTelemetry, Prometheus, Grafana | **VERIFIED** | Scrape configs, 6 alerts, 2 dashboards, 5 runbooks, `test-phase10-observability.ps1` (18/18 PASS) |
+| **Phase 11** | **Kubernetes & Cloud DevOps** | Local `kind`, K8s Base, Terraform | *Next Active* | Kind cluster, K8s manifests, HPA, NetworkPolicies, AWS Terraform reference |
 
 ---
 

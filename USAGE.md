@@ -874,6 +874,49 @@ powershell -File testing/security/test-phase9-security.ps1
 - Row-Level Security active across all database service schemas.
 - Secret hygiene scanner confirming clean repository state.
 
+### Drill 9: Observability, Alerting & Operations (`Phase 10`)
+```powershell
+powershell -File testing/observability/test-phase10-observability.ps1
+```
+*Validates (18/18 PASS):*
+- OpenTelemetry Collector, Prometheus scrape configs, and Alertmanager alert rules YAML syntax.
+- Grafana dashboard specifications (`platform-overview.json` and `ai-governance.json`).
+- W3C distributed traceparent propagation implementation in `backend/common`.
+- Operational incident response runbooks (Kafka lag, DLQ replay, DB pool exhaustion, Ollama degradation, Tenant isolation breach).
+- Multi-service Maven compilation reactor across all 9 modules with 0 errors.
+
+---
+
+## Observability, Monitoring & Operations
+
+The platform includes an observability profile:
+
+### Metrics & Scrape Targets (`infra/observability/prometheus.yml`)
+- Scrapes Spring Boot Actuator Prometheus endpoints for:
+  - `gateway` (:8080)
+  - `ticket-service` (:8081)
+  - `knowledge-service` (:8082)
+  - `workflow-service` (:8083)
+  - `notification-service` (:8084)
+  - `usage-audit-service` (:8085)
+  - `ai-plane` (:8000)
+  - OpenTelemetry Collector (:8889)
+
+### Alert Rules (`infra/observability/alert-rules.yml`)
+- `HighErrorRate`: HTTP 5xx rate > 5% over 5m.
+- `HighP95Latency`: P95 latency > 2s over 5m.
+- `KafkaConsumerLagSpike`: Unconsumed Kafka messages > 500 for > 2m.
+- `DLQSpike`: Dead-letter queue ingress rate > 5 msgs/min.
+- `DBPoolExhaustion`: HikariCP connection pool usage > 90%.
+- `TenantIsolationViolation`: RLS violation detected (`tenant_isolation_violations_total > 0`).
+
+### Incident Runbooks (`docs/operations/runbooks/`)
+- `kafka-consumer-lag.md`: Triage and scale consumer groups under high ingestion lag.
+- `dlq-replay.md`: Safe replay and dead-letter queue drainage procedures.
+- `database-pool-exhaustion.md`: HikariCP leak detection, slow query killing, and connection tuning.
+- `ollama-degradation.md`: Local LLM failure triage and automatic mock/degraded fallback.
+- `tenant-isolation-alert.md`: P0 cross-tenant security alert response, session revocation, and audit query.
+
 ---
 
 ## Summary of Completed Phases
@@ -887,4 +930,5 @@ powershell -File testing/security/test-phase9-security.ps1
 - **Phase 7 (AI Platform Governance, Evaluation & Versioning):** Model adapters, prompt versioning, golden dataset offline evaluation, CI regression gates, semantic caching, and token compression.
 - **Phase 8 (Product Completion & Minimal Admin Experience):** Notification engine (:8084), Usage/Audit service (:8085), Redis rate limiting, SLA breach background detector, and React 18 / TypeScript Operator Admin Console.
 - **Phase 9 (Security Hardening & OWASP Defense):** STRIDE threat model, OWASP Top 10 + LLM Top 10 compliance matrix, input/output guardrails, and secret hygiene verification.
+- **Phase 10 (Observability & Operations):** Prometheus multi-service metrics, 6 critical Alertmanager rules, Grafana dashboards, W3C distributed trace propagation, and 5 operational incident triage runbooks.
 

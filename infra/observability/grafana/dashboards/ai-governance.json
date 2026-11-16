@@ -1,0 +1,61 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "title": "Token Consumption by Tenant",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(ai_tokens_consumed_total[5m])) by (tenant_id)",
+          "legendFormat": "Tenant {{tenant_id}}"
+        }
+      ]
+    },
+    {
+      "title": "Workflow Version Invocations Distribution",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(ai_workflow_invocations_total) by (workflow_version)",
+          "legendFormat": "{{workflow_version}}"
+        }
+      ]
+    },
+    {
+      "title": "Agent Turn Latency (ms)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(ai_agent_latency_ms_bucket[5m])) by (le, agent))",
+          "legendFormat": "p95 {{agent}}"
+        }
+      ]
+    },
+    {
+      "title": "Guardrail Rejections & Blocked Injections",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(increase(ai_guardrail_rejections_total[1h])) by (reason)",
+          "legendFormat": "{{reason}}"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["enterprise-ai", "ai-plane", "governance"],
+  "time": { "from": "now-6h", "to": "now" },
+  "title": "Enterprise AI Platform — AI Governance & Quality",
+  "uid": "platform-ai-governance"
+}

@@ -1,0 +1,45 @@
+# ==============================================================================
+# Enterprise AI Platform: Prometheus Monitoring & Scrape Configuration
+# ==============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alert-rules.yml"
+
+scrape_configs:
+  - job_name: "otel-collector"
+    static_configs:
+      - targets: ["otel-collector:8889", "otel-collector:8888"]
+
+  - job_name: "ticket-service"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["ticket-service:8081"]
+
+  - job_name: "knowledge-service"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["knowledge-service:8082"]
+
+  - job_name: "workflow-service"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["workflow-service:8083"]
+
+  - job_name: "notification-service"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["notification-service:8084"]
+
+  - job_name: "usage-audit-service"
+    metrics_path: "/actuator/prometheus"
+    static_configs:
+      - targets: ["usage-audit-service:8085"]
+
+  - job_name: "ai-plane"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ["ai-plane:8000"]
