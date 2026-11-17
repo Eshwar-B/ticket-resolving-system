@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # Enterprise AI Platform — End-to-End Demonstration Scenario
 # Principal Scenario: Customer reports an empty package received & requests refund
 # Demonstrates: Multi-tenancy, Sync Ingestion, Outbox, AI Triage, RAG Citations,

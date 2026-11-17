@@ -1,0 +1,33 @@
+graph TD
+    subgraph Ingestion["Document Ingestion Pipeline (Knowledge Service)"]
+        RawDoc["Raw Document (PDF / TXT / Markdown)"]
+        S3Storage["MinIO / S3 Object Storage<br/>Key: tenants/{tenant_id}/documents/{id}/v{version}/{filename}"]
+        Chunker["Recursive Text Splitter<br/>(Target: 400 chars, 50 char overlap)"]
+        Embedder["Embedding Model Adapter<br/>(384-dimensional dense vectors)"]
+    end
+
+    subgraph DualIndices["Dual Retrieval Storage (Strict Tenant Partitioned)"]
+        Qdrant["Qdrant Vector DB<br/>Cosine Metric / 384-dim<br/>Payload: {tenant_id, document_id, version, chunk_index}"]
+        PostgresFTS["PostgreSQL 16 (knowledge_db)<br/>document_chunks table<br/>tsv generated column: to_tsvector('english', content)<br/>GIN Index: idx_chunks_tsv<br/>Protected by PostgreSQL RLS"]
+    end
+
+    subgraph QueryPipeline["Hybrid Query & Rank Fusion Pipeline"]
+        Query["User Query / Ticket Text"]
+        DenseSearch["Dense Vector Search<br/>filter: {must: [{key: 'tenant_id', match: {value: tenantId}}]}"]
+        SparseSearch["BM25 Keyword Search<br/>WHERE tsv @@ plainto_tsquery('english', :query)<br/>AND tenant_id = current_setting('app.tenant_id')"]
+        RRF["Reciprocal Rank Fusion (RRF)<br/>Score(d) = Σ [ 1 / (60 + Rank_i(d)) ]"]
+        CitationFilter["Citation Grounding & Deduplication<br/>[Doc: 'Title' v1 #chunk-0]"]
+    end
+
+    RawDoc --> S3Storage
+    RawDoc --> Chunker
+    Chunker --> Embedder
+    Embedder -->|Upsert Points| Qdrant
+    Chunker -->|Insert Rows + RLS| PostgresFTS
+
+    Query --> DenseSearch
+    Query --> SparseSearch
+    DenseSearch -->|Ranked Dense Hits| RRF
+    SparseSearch -->|Ranked Keyword Hits| RRF
+    RRF --> CitationFilter
+    CitationFilter --> Output["Final Context Chunks with Exact Citations"]

@@ -1,0 +1,26 @@
+graph TD
+    subgraph Client["Untrusted Client Request"]
+        Req["HTTP POST /api/v1/tickets<br/>Header: Authorization: Bearer <JWT><br/>Header: X-Tenant-Id: forged-tenant-hacker (ATTACK)"]
+    end
+
+    subgraph GatewayValidation["Spring Cloud Gateway / Host Ingress (:8080)"]
+        VerifyKey["1. Verify RSA/EC Signature against Keycloak JWKS endpoint"]
+        DecodeClaims["2. Parse Claims:<br/>- sub: user-uuid<br/>- iss: http://localhost:8080/realms/enterprise-ai<br/>- tenant_id: tenant-alpha (AUTHORITATIVE)<br/>- roles: ['CUSTOMER', 'USER']"]
+        SanitizeHeader["3. Strip forged client X-Tenant-Id header<br/>Inject validated: X-Tenant-Id: tenant-alpha"]
+        RateLimit["4. Check Redis Sliding Window Rate Limit<br/>Key: t:tenant-alpha:rl:tickets:298371"]
+    end
+
+    subgraph ServiceExecution["Downstream Microservice (Ticket Service :8081)"]
+        MDCContext["5. TenantContextFilter populates ThreadLocal & SLF4J MDC:<br/>TenantContext.setTenantId('tenant-alpha')"]
+        RLSIntercept["6. TenantTransactionInterceptor unwraps JDBC Connection:<br/>EXECUTE set_config('app.tenant_id', 'tenant-alpha', true)"]
+        PostgresEngine["7. PostgreSQL 16 Kernel evaluates RLS Policy:<br/>USING (tenant_id = current_setting('app.tenant_id', true))"]
+    end
+
+    Req --> VerifyKey
+    VerifyKey --> DecodeClaims
+    DecodeClaims --> SanitizeHeader
+    SanitizeHeader --> RateLimit
+    RateLimit -->|Allowed| MDCContext
+    MDCContext --> RLSIntercept
+    RLSIntercept --> PostgresEngine
+    PostgresEngine -->|Strict Isolation Guaranteed| Return["Response Returned to Client"]

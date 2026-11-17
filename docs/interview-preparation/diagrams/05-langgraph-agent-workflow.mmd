@@ -1,0 +1,38 @@
+stateDiagram-v2
+    [*] --> IngestEvent: Kafka consumer receives ticket.created.v1
+    IngestEvent --> CheckCache: Query SemanticCache (t:{tenantId}:cache:{hash})
+
+    CheckCache --> CachedReturn: Cache Hit
+    CheckCache --> TriageStep: Cache Miss
+
+    TriageStep --> RetrieveStep: run_triage()<br/>- Detect intent category<br/>- Check financial keywords<br/>- Assess SLA urgency
+
+    RetrieveStep --> ContextAssembly: run_retrieval()<br/>- Query Knowledge Service RAG<br/>- Extract chunks & citations
+
+    ContextAssembly --> ResolutionStep: ContextManager<br/>- Layer System Policy<br/>- Layer Tenant Config<br/>- Layer Customer Profile<br/>- Layer Retrieved Chunks<br/>- Progressive Compression
+
+    ResolutionStep --> CriticGuard: run_resolution()<br/>- Synthesize resolution plan<br/>- Check auto-refund thresholds
+
+    CriticGuard --> RejectUnsafe: Fails Citation Grounding or Exceeds Boundaries
+    CriticGuard --> ActionRoute: Passes Critic Verification
+
+    state ActionRoute <<choice>>
+    ActionRoute --> HumanApprovalPath: Plan == "HUMAN_APPROVAL_REQUIRED" (Financial / Irreversible)
+    ActionRoute --> AutonomousResolvePath: Plan == "AUTONOMOUS_RESOLVE" (Safe Procedural)
+
+    HumanApprovalPath --> RequestApproval: POST /api/v1/approvals (Workflow Service)
+    RequestApproval --> PostPublicPending: Add Ticket Comment (PUBLIC: Awaiting Approval)
+    PostPublicPending --> PostAuditNote: Add Internal Note (INTERNAL: Flagged for Manager)
+    PostAuditNote --> TransitionPending: Transition Ticket Status: NEW -> OPEN -> PENDING
+    TransitionPending --> TelemetryEmit
+
+    AutonomousResolvePath --> PostPublicResolved: Add Ticket Comment (PUBLIC: Direct Solution)
+    PostPublicResolved --> PostInternalResolved: Add Internal Note (INTERNAL: Solved autonomously)
+    PostInternalResolved --> TransitionResolved: Transition Status: NEW -> OPEN -> IN_PROGRESS -> RESOLVED
+    TransitionResolved --> TelemetryEmit
+
+    RejectUnsafe --> ManualEscalate: Flag for manual agent intervention
+    ManualEscalate --> TelemetryEmit
+
+    TelemetryEmit --> UpdateCache: Cache query & resolution
+    UpdateCache --> [*]: Emit usage.events.v1 to Kafka

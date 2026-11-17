@@ -1,0 +1,25 @@
+graph LR
+    subgraph Microservices["Independent Microservice Domains"]
+        TS["Ticket Service (:8081)"]
+        KS["Knowledge Service (:8082)"]
+        WS["Workflow Service (:8083)"]
+        NS["Notification Service (:8084)"]
+        US["Usage & Audit Service (:8085)"]
+        IS["Identity Service (:8080)"]
+    end
+
+    subgraph ServiceDatabases["PostgreSQL 16 Logical Databases (Zero Cross-DB Joins)"]
+        DB_T[("ticket_db<br/>- tickets<br/>- ticket_comments<br/>- ticket_sla<br/>- outbox_events<br/>- idempotency_records")]
+        DB_K[("knowledge_db<br/>- documents<br/>- document_chunks<br/>  (tsv tsvector GIN)")]
+        DB_W[("workflow_db<br/>- approval_requests")]
+        DB_N[("notification_db<br/>- notifications<br/>- webhook_subscriptions<br/>- webhook_deliveries")]
+        DB_U[("usage_db<br/>- audit_events<br/>- usage_records<br/>- tenant_quotas")]
+        DB_I[("identity_db<br/>- tenants<br/>- users<br/>- tenant_memberships")]
+    end
+
+    TS ---|Exclusive JDBC Ownership| DB_T
+    KS ---|Exclusive JDBC Ownership| DB_K
+    WS ---|Exclusive JDBC Ownership| DB_W
+    NS ---|Exclusive JDBC Ownership| DB_N
+    US ---|Exclusive JDBC Ownership| DB_U
+    IS ---|Exclusive JDBC Ownership| DB_I

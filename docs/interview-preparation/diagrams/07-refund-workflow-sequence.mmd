@@ -1,0 +1,52 @@
+sequenceDiagram
+    autonumber
+    actor Customer as Customer (tenant-alpha)
+    participant Gateway as API Gateway (:8080)
+    participant TicketSvc as Ticket Service (:8081)
+    participant Outbox as Outbox Poller
+    participant Kafka as Apache Kafka (:9092)
+    participant AIPlane as AI Supervisor Loop (:8000)
+    participant Knowledge as Knowledge Service (:8082)
+    participant Workflow as Workflow Service (:8083)
+    actor Manager as Support Manager (tenant-alpha)
+    participant Usage as Usage & Audit Service (:8085)
+
+    Customer->>Gateway: POST /api/v1/tickets ("Empty package received, refund required")
+    Gateway->>TicketSvc: Forward with JWT & X-Tenant-Id: tenant-alpha
+    TicketSvc->>TicketSvc: Persist Ticket (Status: NEW) + Outbox record (ticket.created.v1)
+    TicketSvc-->>Customer: HTTP 201 Created (Ticket ID: e757ab5c)
+
+    Outbox->>Kafka: Poll Outbox & Publish ticket.created.v1 (Key: tenant-alpha)
+    Kafka->>AIPlane: Deliver event to AI Consumer
+
+    Note over AIPlane: Stage 1: Triage Agent
+    AIPlane->>AIPlane: Classifies: RETURN_REFUND, is_financial=true, requires_human_approval=true
+
+    Note over AIPlane: Stage 2: Retrieval Agent
+    AIPlane->>Knowledge: POST /api/v1/knowledge/search ("Empty package refund policy")
+    Knowledge-->>AIPlane: Chunks with Citation [Doc: "Refund Policy" v1 #chunk-0]
+
+    Note over AIPlane: Stage 3: Resolution & Critic Agents
+    AIPlane->>AIPlane: Drafts response & validates grounding against policy terms
+
+    Note over AIPlane: Stage 4: Human-in-the-Loop Routing
+    AIPlane->>Workflow: POST /api/v1/approvals (actionType="REFUND_APPROVAL", ticketId=e757ab5c)
+    Workflow-->>AIPlane: Created Approval (ID: 41cbcec6, Status: PENDING)
+
+    AIPlane->>TicketSvc: Add INTERNAL comment ("Flagged for manager refund review")
+    AIPlane->>TicketSvc: Add PUBLIC comment ("Your refund request is queued for manager review")
+    AIPlane->>TicketSvc: PATCH /status -> PENDING ("Awaiting human approval")
+
+    Note over Manager: Stage 5: Human Review via Admin Console
+    Manager->>Workflow: GET /api/v1/approvals/pending
+    Workflow-->>Manager: Returns Approval 41cbcec6
+    Manager->>Workflow: POST /api/v1/approvals/41cbcec6/decision (decision=APPROVED, note="Package confirmed lost")
+    Workflow-->>Manager: HTTP 200 OK (Status: APPROVED)
+    Workflow->>Kafka: Publish workflow.approval.granted.v1
+
+    Note over AIPlane: Stage 6: Execution & Finalization
+    Kafka->>AIPlane: Consume approval granted
+    AIPlane->>TicketSvc: PATCH /status -> RESOLVED ("Refund authorized and processed")
+    AIPlane->>TicketSvc: Add PUBLIC comment ("Refund of $120.00 successfully issued to your card.")
+    AIPlane->>Usage: POST /api/v1/usage (tokens=350, model="llama3:8b", latency=125ms)
+    AIPlane->>Usage: POST /api/v1/audit (event="TICKET_RESOLVED_WITH_APPROVAL")

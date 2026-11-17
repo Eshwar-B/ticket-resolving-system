@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # Enterprise AI Platform — Backup and Disaster Recovery Script
 # Performs atomic backups and recovery drills for PostgreSQL, Qdrant & MinIO
 # ==============================================================================

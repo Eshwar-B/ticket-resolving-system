@@ -1,0 +1,29 @@
+sequenceDiagram
+    autonumber
+    actor Client as Authenticated Client (JWT)
+    participant Filter as TenantContextFilter
+    participant Thread as ThreadLocal (TenantContext)
+    participant AOP as TenantTransactionInterceptor
+    participant Pool as HikariCP Connection Pool
+    participant PG as PostgreSQL 16 Kernel (app_user)
+
+    Client->>Filter: HTTP Request (Authorization: Bearer <JWT>, X-Tenant-Id: tenant-alpha)
+    Note over Filter: Validates token claims & extracts tenantId
+    Filter->>Thread: TenantContext.setTenantId("tenant-alpha")
+    Filter->>Thread: MDC.put("tenant_id", "tenant-alpha")
+
+    Filter->>AOP: Invoke @Transactional Service Method
+    AOP->>Thread: TenantContext.getTenantId()
+    AOP->>Pool: Borrow physical Connection
+    AOP->>PG: EXECUTE: SELECT set_config('app.tenant_id', 'tenant-alpha', true)
+    Note over PG: Transaction-local session variable bound.<br/>Auto-resets on COMMIT/ROLLBACK.
+
+    AOP->>PG: Hibernate Query: SELECT * FROM tickets WHERE id = ?
+    Note over PG: Kernel applies RLS Policy:<br/>USING (tenant_id = current_setting('app.tenant_id', true))
+    PG-->>AOP: Return only rows matching tenant-alpha
+    AOP-->>Filter: Method Return / Transaction Commit
+
+    Note over Filter: finally block cleans up ThreadLocal
+    Filter->>Thread: TenantContext.clear()
+    Filter->>Thread: MDC.remove("tenant_id")
+    Filter-->>Client: HTTP 200 OK (Isolated Payload)

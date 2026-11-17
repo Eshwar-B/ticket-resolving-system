@@ -1,4 +1,4 @@
-﻿# ==============================================================================
+# ==============================================================================
 # Enterprise AI Platform — Synthetic Benchmark Data Generator
 # Generates realistic multi-tenant ticket datasets for load testing & DB benchmarks
 # ==============================================================================

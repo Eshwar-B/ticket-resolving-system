@@ -1,0 +1,78 @@
+graph TD
+    subgraph ClientLayer["Client & Operator Plane"]
+        User["End Customer / Client"]
+        Agent["Support Agent / Lead"]
+        Admin["Tenant Administrator"]
+        ReactUI["React 18 Admin Console (:3000)<br/>Vite / TS / Tailwind"]
+    end
+
+    subgraph IngressLayer["Edge & Ingress Plane"]
+        Gateway["Spring Cloud Gateway / Host (:8080)<br/>- JWT Validation<br/>- Tenant Derivation<br/>- Distributed Rate Limiting"]
+        Keycloak["Keycloak OIDC Provider (:8080)<br/>- Realm: enterprise-ai<br/>- Tenancy Claims & Roles"]
+    end
+
+    subgraph ControlPlane["Java 21 Control Plane (Spring Boot 3.3.4)"]
+        TicketSvc["Ticket Service (:8081)<br/>- 8-State Ticket Machine<br/>- Transactional Outbox<br/>- Idempotency Engine"]
+        KnowledgeSvc["Knowledge Service (:8082)<br/>- S3 Document Archival<br/>- Hybrid Search & RRF<br/>- Citation Engine"]
+        WorkflowSvc["Workflow Service (:8083)<br/>- Human Approvals Engine<br/>- State Transitions<br/>- Decision Auditing"]
+        NotifSvc["Notification Service (:8084)<br/>- In-App Alerts<br/>- Signed HMAC Webhooks"]
+        UsageSvc["Usage & Audit Service (:8085)<br/>- Append-Only Audit Trail<br/>- Token Metering<br/>- Tenant Quotas"]
+    end
+
+    subgraph AIPlane["Python 3.12 AI Intelligence Plane (FastAPI :8000)"]
+        Supervisor["LangGraph Supervisor Loop"]
+        TriageAgent["Triage Agent (Risk Tiering)"]
+        RetrievalAgent["Retrieval Agent (RAG Client)"]
+        ResolutionAgent["Resolution Agent (Plan Synthesis)"]
+        CriticAgent["Critic Agent (Citation Guard)"]
+        ModelAdapter["Model Adapter (Ollama / Mock)"]
+        SemanticCache["Semantic Cache (Redis Scoped)"]
+    end
+
+    subgraph MessagingLayer["Event Streaming Layer (Apache Kafka 3.8 KRaft)"]
+        KafkaBroker["Kafka Broker (:9092)<br/>- ticket.events.v1<br/>- workflow.events.v1<br/>- usage.events.v1"]
+    end
+
+    subgraph DataLayer["Storage & Vector Infrastructure"]
+        Postgres[("PostgreSQL 16 (:5432)<br/>- ticket_db<br/>- knowledge_db<br/>- workflow_db<br/>- notification_db<br/>- usage_db<br/>Kernel Row-Level Security")]
+        RedisDB[("Redis 7 (:6379)<br/>- Sliding Window Rate Limit<br/>- Tenant Semantic Cache<br/>- Short-Term Memory")]
+        QdrantDB[("Qdrant Vector DB (:6333)<br/>- 384-dim Dense Embeddings<br/>- Tenant Payload Filtering")]
+        MinIODB[("MinIO / S3Mock (:9000)<br/>- Bucket: enterprise-ai-knowledge<br/>- Key: tenants/{id}/...")]
+    end
+
+    User -->|HTTP POST Ticket| Gateway
+    Agent -->|Manage & Triage| ReactUI
+    Admin -->|Governance & Approvals| ReactUI
+    ReactUI -->|REST APIs| Gateway
+    Gateway -->|Verify JWT| Keycloak
+    Gateway -->|Route with X-Tenant-Id| TicketSvc
+    Gateway -->|Route| WorkflowSvc
+    Gateway -->|Route| KnowledgeSvc
+    Gateway -->|Route| NotifSvc
+    Gateway -->|Route| UsageSvc
+
+    TicketSvc -->|Persist Ticket & Outbox| Postgres
+    TicketSvc -->|Outbox Poller Relay| KafkaBroker
+    TicketSvc -->|Sliding Window Check| RedisDB
+
+    KafkaBroker -->|ticket.created.v1| AIPlane
+    Supervisor --> TriageAgent
+    Supervisor --> RetrievalAgent
+    Supervisor --> ResolutionAgent
+    Supervisor --> CriticAgent
+    ResolutionAgent --> ModelAdapter
+    Supervisor --> SemanticCache
+    SemanticCache --> RedisDB
+
+    RetrievalAgent -->|Hybrid Search| KnowledgeSvc
+    KnowledgeSvc -->|Dense Vector Cosine| QdrantDB
+    KnowledgeSvc -->|BM25 Keyword tsvector| Postgres
+    KnowledgeSvc -->|Raw File Blob| MinIODB
+
+    Supervisor -->|High-Risk Refund| WorkflowSvc
+    WorkflowSvc -->|Persist Approval & Audit| Postgres
+    WorkflowSvc -->|workflow.approval.*| KafkaBroker
+
+    NotifSvc -->|Persist In-App & Webhook| Postgres
+    UsageSvc -->|Append Audit & Metering| Postgres
+    AIPlane -->|Emit Telemetry| UsageSvc

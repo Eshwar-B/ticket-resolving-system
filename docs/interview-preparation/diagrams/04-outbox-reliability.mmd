@@ -1,0 +1,35 @@
+sequenceDiagram
+    autonumber
+    actor Client as Customer / API Client
+    participant API as TicketController
+    participant Idem as IdempotencyFilter
+    participant DB as PostgreSQL 16 (ticket_db)
+    participant Poller as OutboxPoller (1s Fixed Delay)
+    participant Kafka as Apache Kafka (KRaft)
+    participant Consumer as AI Event Consumer
+
+    Client->>Idem: POST /api/v1/tickets (Idempotency-Key: abc-123)
+    Idem->>DB: Check idempotency_records WHERE key = 'abc-123'
+    alt Key already exists (Replay)
+        DB-->>Idem: Cached Response (201 Created)
+        Idem-->>Client: Return cached 201 + (X-Idempotent-Replay: true)
+    else Key is new
+        Idem->>API: Execute Ticket Creation
+        API->>DB: BEGIN TRANSACTION
+        API->>DB: INSERT INTO tickets (...) VALUES (...)
+        API->>DB: INSERT INTO outbox_events (event_type='ticket.created.v1', status='PENDING', payload=...)
+        API->>DB: INSERT INTO idempotency_records (key='abc-123', status_code=201, payload=...)
+        API->>DB: COMMIT TRANSACTION
+        Note over DB: Single atomic commit prevents dual-write failures!
+        API-->>Client: HTTP 201 Created
+
+        loop Every 1 Second
+            Poller->>DB: SELECT * FROM outbox_events WHERE status = 'PENDING' FOR UPDATE SKIP LOCKED
+            Poller->>Kafka: Produce record to 'ticket.events.v1' (Key = tenantId)
+            Kafka-->>Poller: ACK RecordMetadata(offset=102)
+            Poller->>DB: UPDATE outbox_events SET status = 'PUBLISHED', published_at = NOW()
+        end
+
+        Kafka->>Consumer: Deliver ticket.created.v1
+        Note over Consumer: Inbox check deduplicates by eventId
+    end
